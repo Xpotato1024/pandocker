@@ -18,12 +18,12 @@
 .
 │  Dockerfile               # Pandoc環境を定義するファイル
 │  docker-compose.yml       # Dockerイメージのビルドを簡単にするファイル
-│  ieee-with-url.csl        # (例) 引用スタイルファイル
-│  new.ps1                  # ★ 新規レポート作成スクリプト
-│  pandocker.ps1            # ★ PDFビルド用スクリプト
+│  ieee-with-url.csl        # 引用スタイルファイル
+│  new.ps1                  # 新規レポートファイル作成スクリプト
+│  pandocker.ps1            # PDF変換用スクリプト
 │  README.md                # このファイル
 │
-└─ report1/                 # (例) "report1"という名前のレポート
+└─ report1/                 # 生成された"report1"という名前のレポートファイル
     │  defaults.yml          # レポート固有のPandoc設定
     │
     ├─ bib/
