@@ -23,6 +23,14 @@
 │  pandocker.ps1            # PDF変換用スクリプト
 │  README.md                # このファイル
 │
+├─ .cache/                  # Dockerビルドキャッシュ (Bind Mount)
+│   ├─ texlive/
+│   ├─ texmf/
+│   └─ fontconfig/
+│
+├─ log/
+│   └─ pandoc.log           # 生成時のログファイル
+│
 └─ report1/                 # 生成された"report1"という名前のレポートファイル
     │  defaults.yml          # レポート固有のPandoc設定
     │
@@ -89,4 +97,19 @@ date: "2025-10-12"
 bibliography: ../bib/references.bib
 csl: ../../new-style.csl  # ← ここを書き換える
 ---
+~~~
+
+### 補足: キャッシュとログ
+
+- .cache/ フォルダに LaTeX・フォントなどのキャッシュが保存されます。  
+    これにより、2回目以降のビルド時間が大幅に短縮されます。
+- -CleanCache オプションを付けると .cache/ が削除・再生成されます。
+- 生成時の全出力は log/pandoc.log に追記されるため、エラー解析や再現確認が容易です。
+
+~~~bash
+# 通常ビルド
+./pandocker.ps1 report1
+
+# キャッシュを削除して再生成
+./pandocker.ps1 report1 -CleanCache
 ~~~
