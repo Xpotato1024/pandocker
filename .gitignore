@@ -64,3 +64,4 @@ report1/output/
 *.pdf
 /report1/defaults.yml
 /report1/src/report.md
+/report1/bib/references.bib
