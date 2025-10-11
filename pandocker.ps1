@@ -47,7 +47,7 @@ $CacheDirs = @(
 foreach ($dir in $CacheDirs) {
     if (-not (Test-Path $dir.Path)) { New-Item -ItemType Directory -Force -Path $dir.Path | Out-Null }
 }
-$CacheMounts = $CacheDirs | ForEach-Object { "-v `"$($_.Path):/root/.cache/$($_.Name)`"" } -join " "
+$CacheMounts = ($CacheDirs | ForEach-Object { "-v `"$($_.Path):/root/.cache/$($_.Name)`"" }) -join " "
 
 # 6. その他設定
 $ContainerWorkDir = "/data/$ReportName/src"
