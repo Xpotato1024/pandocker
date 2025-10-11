@@ -1,4 +1,4 @@
-# Pandoc + LuaLaTeX PDF生成環境README
+# Pandoc + LuaLaTeX + Pandoc-crossref PDF生成環境
 
 ## 概要
 このプロジェクトは、Pandocを利用してMarkdownファイルから高品質な日本語PDFを生成するためのDocker環境です。PowerShellスクリプトを実行するだけで、レポートの雛形作成からPDFのビルドまでを簡単に行うことができます。
