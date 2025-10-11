@@ -5,7 +5,6 @@
 #
 # 例:
 #   ./pandocker.ps1 "report-weekly-progress" -CleanCache
-# -------------------------------------------------------------
 
 param (
     [Parameter(Position=0, Mandatory=$true)]
@@ -14,67 +13,61 @@ param (
     [switch]$CleanCache
 )
 
-# 1. 指定ディレクトリ確認
+# --- 1. レポートディレクトリ確認 ---
 if (-not (Test-Path -Path $ReportName -PathType Container)) {
-    Write-Host "エラー: '$ReportName' という名前のディレクトリが見つかりません。" -ForegroundColor Red
+    Write-Host "エラー: '$ReportName' が見つかりません。" -ForegroundColor Red
     Write-Host "ヒント: ./new.ps1 '$ReportName' を実行してレポート環境を作成してください。"
     return
 }
 
-# 2. プロジェクトルート
+# --- 2. 作業ディレクトリ・ログ ---
 $WorkDir = (Get-Location).Path
-$CacheRoot = Join-Path $WorkDir ".cache"
-$LogDir = Join-Path $WorkDir "log"
+$LogDir  = Join-Path $WorkDir "log"
 $LogFile = Join-Path $LogDir "pandoc.log"
-
-# 3. ディレクトリ準備
 if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Force -Path $LogDir | Out-Null }
-if (-not (Test-Path $CacheRoot)) { New-Item -ItemType Directory -Force -Path $CacheRoot | Out-Null }
 
-# 4. キャッシュ初期化スイッチ
+# --- 3. Docker named volumes ---
+$TexliveVol  = "texlive-cache"
+$TexmfVol    = "texmf-cache"
+$FontVol     = "font-cache"
+$PandocVol   = "pandoc-cache"
+
+# --- 4. キャッシュ初期化 ---
 if ($CleanCache) {
-    Write-Host "キャッシュを初期化中..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $CacheRoot
-    New-Item -ItemType Directory -Force -Path $CacheRoot | Out-Null
+    Write-Host "キャッシュボリュームを初期化中..." -ForegroundColor Yellow
+    docker volume rm -f $TexliveVol,$TexmfVol,$FontVol,$PandocVol | Out-Null
 }
 
-# 5. キャッシュBind Mount設定
-$CacheDirs = @(
-    @{ Name = "texlive"; Path = "$CacheRoot/texlive" },
-    @{ Name = "texmf"; Path = "$CacheRoot/texmf" },
-    @{ Name = "font"; Path = "$CacheRoot/fontconfig" }
-)
-foreach ($dir in $CacheDirs) {
-    if (-not (Test-Path $dir.Path)) { New-Item -ItemType Directory -Force -Path $dir.Path | Out-Null }
-}
-$CacheMounts = ($CacheDirs | ForEach-Object { "-v `"$($_.Path):/root/.cache/$($_.Name)`"" }) -join " "
+# --- 5. キャッシュマウント ---
+Write-Host "キャッシュマウントを有効化します。" -ForegroundColor Cyan
+$CacheMounts = "-v ${TexliveVol}:/root/.texlive2022 -v ${TexmfVol}:/var/lib/texmf -v ${FontVol}:/root/.cache/fontconfig -v ${PandocVol}:/root/.cache/pandoc"
 
-# 6. その他設定
+# --- 6. PDF関連設定 ---
 $ContainerWorkDir = "/data/$ReportName/src"
-$InputFile = "report.md"
-$DefaultsFile = "../defaults.yml"
-$OutputFile = "../output/$($ReportName).pdf"
+$InputFile        = "report.md"
+$DefaultsFile     = "../defaults.yml"
+$OutputFile       = "../output/$($ReportName).pdf"
 
-# 7. Dockerコマンド構築
+# --- 7. Dockerコマンド構築 ---
 $DockerCmd = "docker run --rm -v `"$WorkDir`:/data`" -w `"$ContainerWorkDir`" $CacheMounts pandoc-ja --defaults `"$DefaultsFile`" -F pandoc-crossref `"$InputFile`" -o `"$OutputFile`" --citeproc -M listings"
 
-# 8. 実行とログ保存
+# --- 8. 実行 ---
 Write-Host "PDFを生成しています..." -ForegroundColor Cyan
 Write-Host "コマンド: $DockerCmd"
 
-# ログに追記しつつ画面にも出力
+# ログにも追記
 $DockerCmd | Out-File -Append -FilePath $LogFile
 Invoke-Expression "$DockerCmd 2>&1 | Tee-Object -FilePath $LogFile"
 
-# 9. 出力確認
+# --- 9. PDF出力確認 ---
 $OutputFullPath = Join-Path -Path $WorkDir -ChildPath "$ReportName/output/$($ReportName).pdf"
 if (Test-Path $OutputFullPath) {
     Write-Host ""
-    Write-Host "PDFの生成が完了しました！" -ForegroundColor Green
+    Write-Host "PDF生成完了！" -ForegroundColor Green
     Write-Host "出力先: $OutputFullPath"
     Write-Host "ログ: $LogFile"
 } else {
     Write-Host ""
-    Write-Host "エラー: PDFの生成に失敗した可能性があります。" -ForegroundColor Red
-    Write-Host "詳細はログファイルを確認してください: $LogFile"
+    Write-Host "エラー: PDF生成に失敗しました。" -ForegroundColor Red
+    Write-Host "詳細はログを確認してください: $LogFile"
 }
