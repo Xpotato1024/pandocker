@@ -1,0 +1,47 @@
+# Pandoc Defaults File
+# ===============================================
+
+# --- 入力と出力 ---
+reader: markdown
+writer: pdf
+pdf-engine: lualatex
+highlight-style: tango
+
+# ----------------------------------------------------
+# pandoc-crossref フィルタ用のメタデータ
+# ----------------------------------------------------
+metadata:
+  figureTitle: "図 "
+  tableTitle: "表 "
+  eqTitle: "式 "
+  listingTitle: "リスト "
+  figPrefix:
+    - "図."
+    - "図."
+  tblPrefix: "表."
+  eqnPrefix: "式."
+  lstPrefix: "リスト."
+  reference-section-title: "参考文献"
+
+# ----------------------------------------------------
+# Pandocテンプレート（LaTeX）用の変数
+# ----------------------------------------------------
+variables:
+  lang: ja-JP
+  documentclass: ltjsarticle
+  mainfont: "Noto Serif CJK JP"
+  sansfont: "Noto Sans CJK JP"
+  monofont: "Noto Sans Mono CJK JP"
+  geometry: "top=25mm, bottom=25mm, left=20mm, right=20mm"
+  header-includes:
+    - \usepackage{luatexja}
+    - \usepackage{luatexja-preset}
+    - \usepackage{float}
+    - \ltjsetparameter{jacharrange={-2}}
+    - \renewcommand{\baselinestretch}{1.3}
+    - \setlength{\parindent}{1em}
+    - \setlength{\parskip}{0pt}
+    - \usepackage{listings}
+    - \usepackage{amsmath}
+  fig-pos: "htbp"
+  reference-section-title: "参考文献"

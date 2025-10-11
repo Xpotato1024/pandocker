@@ -1,0 +1,5 @@
+services:
+  pandoc:
+    build: .
+    volumes:
+      - .:/data
