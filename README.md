@@ -19,14 +19,10 @@
 │  Dockerfile               # Pandoc環境を定義するファイル
 │  docker-compose.yml       # Dockerイメージのビルドを簡単にするファイル
 │  ieee-with-url.csl        # 引用スタイルファイル
+|  setup.ps1                # 環境セットアップスクリプト
 │  new.ps1                  # 新規レポートファイル作成スクリプト
 │  pandocker.ps1            # PDF変換用スクリプト
 │  README.md                # このファイル
-│
-├─ .cache/                  # Dockerビルドキャッシュ (Bind Mount)
-│   ├─ texlive/
-│   ├─ texmf/
-│   └─ fontconfig/
 │
 ├─ log/
 │   └─ pandoc.log           # 生成時のログファイル
@@ -53,7 +49,7 @@
 この環境を初めて使うとき、またはDockerfileを更新したときに一度だけ実行します。PowerShellでこのフォルダに移動し、以下のコマンドを実行してください。
 
 ~~~bash
-docker build -t pandoc-ja . 
+./setup.ps1
 ~~~
 
 ### ステップ2: 新しいレポート環境の作成
@@ -110,6 +106,6 @@ csl: ../../new-style.csl  # ← ここを書き換える
 # 通常ビルド
 ./pandocker.ps1 report1
 
-# キャッシュを削除して再生成
-./pandocker.ps1 report1 -CleanCache
+# ログを出力するビルド
+./pandocker.ps1 report1 -log
 ~~~

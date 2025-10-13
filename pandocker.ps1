@@ -1,73 +1,60 @@
 ﻿# pandocker.ps1
 #
 # 使い方:
-#   ./pandocker.ps1 "レポート名" [-CleanCache]
+#   ./pandocker.ps1 "レポート名" [-Log]
 #
 # 例:
-#   ./pandocker.ps1 "report-weekly-progress" -CleanCache
+#   ./pandocker.ps1 "report-weekly-progress" -log
 
 param (
     [Parameter(Position=0, Mandatory=$true)]
     [string]$ReportName,
 
-    [switch]$CleanCache
+    [Parameter(Position=1)]
+    [switch]$Log
 )
 
-# --- 1. レポートディレクトリ確認 ---
-if (-not (Test-Path -Path $ReportName -PathType Container)) {
-    Write-Host "エラー: '$ReportName' が見つかりません。" -ForegroundColor Red
-    Write-Host "ヒント: ./new.ps1 '$ReportName' を実行してレポート環境を作成してください。"
-    return
-}
-
-# --- 2. 作業ディレクトリ・ログ ---
+# --- 1. 環境設定 ---
 $WorkDir = (Get-Location).Path
-$LogDir  = Join-Path $WorkDir "log"
-$LogFile = Join-Path $LogDir "pandoc.log"
-if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Force -Path $LogDir | Out-Null }
-
-# --- 3. Docker named volumes ---
-$TexliveVol  = "texlive-cache"
-$TexmfVol    = "texmf-cache"
-$FontVol     = "font-cache"
-$PandocVol   = "pandoc-cache"
-
-# --- 4. キャッシュ初期化 ---
-if ($CleanCache) {
-    Write-Host "キャッシュボリュームを初期化中..." -ForegroundColor Yellow
-    docker volume rm -f $TexliveVol,$TexmfVol,$FontVol,$PandocVol | Out-Null
-}
-
-# --- 5. キャッシュマウント ---
-Write-Host "キャッシュマウントを有効化します。" -ForegroundColor Cyan
-$CacheMounts = "-v ${TexliveVol}:/root/.texlive2022 -v ${TexmfVol}:/var/lib/texmf -v ${FontVol}:/root/.cache/fontconfig -v ${PandocVol}:/root/.cache/pandoc"
-
-# --- 6. PDF関連設定 ---
 $ContainerWorkDir = "/data/$ReportName/src"
-$InputFile        = "report.md"
-$DefaultsFile     = "../defaults.yml"
-$OutputFile       = "../output/$($ReportName).pdf"
+$InputFile = "report.md"
+$Defaults = "../defaults.yml"
+$OutputFile = "../output/$ReportName.pdf"
 
-# --- 7. Dockerコマンド構築 ---
-$DockerCmd = "docker run --rm -v `"$WorkDir`:/data`" -w `"$ContainerWorkDir`" $CacheMounts pandoc-ja --defaults `"$DefaultsFile`" -F pandoc-crossref `"$InputFile`" -o `"$OutputFile`" --citeproc -M listings"
+# --- 2. ログ出力先 ---
+$LogDir = Join-Path $WorkDir "log"
 
-# --- 8. 実行 ---
-Write-Host "PDFを生成しています..." -ForegroundColor Cyan
-Write-Host "コマンド: $DockerCmd"
+# --- 3. Pandocコマンド ---
+$PandocArgs = "--defaults '$Defaults' -F pandoc-crossref '$InputFile' -o '$OutputFile' --citeproc -M listings"
 
-# ログにも追記
-$DockerCmd | Out-File -Append -FilePath $LogFile
-Invoke-Expression "$DockerCmd 2>&1 | Tee-Object -FilePath $LogFile"
-
-# --- 9. PDF出力確認 ---
-$OutputFullPath = Join-Path -Path $WorkDir -ChildPath "$ReportName/output/$($ReportName).pdf"
-if (Test-Path $OutputFullPath) {
-    Write-Host ""
-    Write-Host "PDF生成完了！" -ForegroundColor Green
-    Write-Host "出力先: $OutputFullPath"
-    Write-Host "ログ: $LogFile"
+# --- 4. 実行コマンド構築 ---
+if ($Log.IsPresent) {
+    # ログが有効な場合、--verboseを追加し、出力をログファイルにリダイレクト
+    if (-not (Test-Path $LogDir)) { New-Item -ItemType Directory -Force -Path $LogDir | Out-Null }
+    $PandocArgs += " --verbose"
+    $BashCommandRaw = "cd '$ContainerWorkDir' && { echo '--- Build started at `$(date --iso-8601=seconds) ---'; pandoc $PandocArgs; } &>> /data/log/pandoc.log"
+    Write-Host "PDF生成を開始します... (ログは log/pandoc.log に追記されます)" -ForegroundColor Cyan
 } else {
-    Write-Host ""
-    Write-Host "エラー: PDF生成に失敗しました。" -ForegroundColor Red
-    Write-Host "詳細はログを確認してください: $LogFile"
+    # ログが無効な場合、コンソールに直接出力（エラー時のみ表示される）
+    $BashCommandRaw = "cd '$ContainerWorkDir' && pandoc $PandocArgs"
+    Write-Host "PDF生成を開始します..." -ForegroundColor Cyan
+}
+$BashCommand = $BashCommandRaw -replace "'", "''"
+$DockerCmd = "docker compose run --rm --entrypoint bash pandoc -c '$BashCommand'"
+
+# --- 5. 実行 ---
+Write-Host $DockerCmd
+$StartTime = Get-Date
+Invoke-Expression $DockerCmd
+$EndTime = Get-Date
+$ElapsedTime = New-TimeSpan -Start $StartTime -End $EndTime
+
+# --- 6. 結果確認 ---
+$OutputFullPath = Join-Path $WorkDir "$ReportName/output/$ReportName.pdf"
+if (Test-Path $OutputFullPath) {
+    $FormattedTime = "{0:N3}" -f $ElapsedTime.TotalSeconds
+    Write-Host "PDF生成完了: $OutputFullPath" -ForegroundColor Green
+    Write-Host "   経過時間: $FormattedTime 秒" -ForegroundColor DarkGray
+} else {
+    Write-Host "PDF生成に失敗しました。詳細はログを確認してください: log/pandoc.log" -ForegroundColor Red
 }
