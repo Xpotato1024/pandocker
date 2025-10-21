@@ -69,6 +69,21 @@ PowerShell スクリプトを実行するだけで、レポートの雛形作成
 
 ## 使い方
 
+### 0. Docker と WSL の統合設定
+まずはDocker DesktopとUbuntu、Power Shellをインストールしてください。
+Docker Desktop で PDF ビルド環境を正しく動作させるには、WSL 統合を有効にする必要があります。
+
+1. Docker Desktop を開く
+
+2. Settings → Resources → WSL Integration に移動
+
+3. 以下を有効化
+
+     - Enable integration with my default WSL distro
+     - Enable integration with additional distros: で使用する Ubuntu のトグルをオン
+
+これにより、Docker コンテナが WSL2 上の Ubuntu と連携して動作可能になります。
+
 ### 1. 初回セットアップ
 
 初めて利用する場合、Docker イメージと WSL 作業環境を構築します。

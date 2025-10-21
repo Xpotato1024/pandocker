@@ -1,5 +1,16 @@
 ﻿Write-Host "=== 初回セットアップ開始 (WSLモード) ===" -ForegroundColor Cyan
 
+# --- 0. スクリプトのアンブロック（自動） ---
+$scriptFolder = $PSScriptRoot
+Get-ChildItem -Path $scriptFolder -Filter *.ps1 -Recurse | ForEach-Object {
+    try {
+        Unblock-File -Path $_.FullName
+    } catch {
+        Write-Host "アンブロック失敗: $($_.FullName)" -ForegroundColor Red
+    }
+}
+Write-Host "フォルダ内の .ps1 ファイルをすべてアンブロックしました。" -ForegroundColor Cyan
+
 # --- 1. 共通設定とヘルパー関数を読み込む ---
 try {
     . (Join-Path $PSScriptRoot "config.ps1")
