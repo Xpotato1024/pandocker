@@ -1,6 +1,7 @@
 services:
   pandoc:
     image: pandoc-ja
+    build: .
     working_dir: /data
     volumes:
       # Mount the current project directory into /data in the container

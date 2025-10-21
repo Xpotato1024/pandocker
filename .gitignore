@@ -58,10 +58,13 @@ report1/output/
 *~
 ~$*
 
-# ==========================================
-# その他生成物
-# ==========================================
-*.pdf
-/report1/defaults.yml
-/report1/src/report.md
-/report1/bib/references.bib
+# =========================================
+# プロジェクト生成物を除外
+# =========================================
+projects/**
+
+# ただし、サンプルだけは残す
+!projects/sample-report/
+!projects/sample-report/**/defaults.yml
+!projects/sample-report/**/report.md
+!projects/sample-report/**/references.bib
