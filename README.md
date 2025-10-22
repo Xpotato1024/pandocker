@@ -217,7 +217,7 @@ csl: ../../../csl/ieee-with-url.csl #ここを変更して引用スタイルを�
 
 ## ライセンス
 
-- MIT License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 作成者
 
