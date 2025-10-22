@@ -1,5 +1,8 @@
 # Pandocker: Markdown → PDF 自動ビルド環境
 
+[![GitHub release](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/Xpotato1024/pandocker/releases/tag/v1.0.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 ## 概要
 
 Pandocker は **Docker + Ubuntu(WSL2)** 上で動作する、Pandoc + LuaLaTeX + pandoc-crossref 環境です。Markdown から高品質な日本語 PDF を自動生成できます。
@@ -127,8 +130,9 @@ Docker Desktop で PDF ビルド環境を正しく動作させるには、WSL �
      - 無指定ならreport.mdをビルド
      - 1つ指定すればそのmarkdownをビルド
      - 複数指定で指定したmarkdownを順番にビルド
-     - -Allスイッチでsrc/内のすべてのmarkdownをビルド
-     - -Logスイッチでログ出力
+  
+- -Allスイッチでsrc/内のすべてのmarkdownをビルド
+- -Logスイッチでログ出力
 
 #### 引数指定の挙動
 
@@ -214,10 +218,6 @@ csl: ../../../csl/ieee-with-url.csl #ここを変更して引用スタイルを�
 - **フォントエラー:** `./setup.ps1` を再実行して TeX Live を再構築。
 
 ---
-
-## ライセンス
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 作成者
 
