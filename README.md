@@ -194,11 +194,12 @@ pdx build "report-name"
 
 #### 引数指定の挙動
 
-| **種類** | **例** | **動作** |
-| **無指定** | `pdx build "report-name"` | `projects/report-name/src` 内の`report.md`についてビルドを実行します。 |
-| **単数指定** | `pdx build "report-name" "report1.md"` | 指定したMarkdownのみをビルドします。 |
-| **複数指定** | `pdx build "report-name" "report1.md" "report2.md"` | 指定した複数のMarkdownを順にビルドします。 |
-| **全指定（-All）** | `pdx build "report-name" -All` | `projects/report-name/src` 以下すべてのMarkdownを自動的にビルドします。 |
+| 種類 | 例 | 動作 |
+|------|----|------|
+| **無指定** | `pdx build "report-name"` | `projects/report-name/src` 内の `report.md` についてビルドを実行します。 |
+| **単数指定** | `pdx build "report-name" "report1.md"` | 指定した Markdown のみをビルドします。 |
+| **複数指定** | `pdx build "report-name" "report1.md" "report2.md"` | 指定した複数の Markdown を順にビルドします。 |
+| **全指定（-All）** | `pdx build "report-name" -All` | `projects/report-name/src` 以下すべての Markdown を自動的にビルドします。 |
 
 生成結果は `projects/report-name/output/` に保存されます。
 
