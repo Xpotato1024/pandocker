@@ -24,8 +24,8 @@ $PdxRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ScriptPath = Join-Path $PdxRoot "scripts"
 $ConfigPath = Join-Path $PdxRoot "config"
 
-if (!(Test-Path $ScriptPath)) { Write-Host "❌ scripts ディレクトリが見つかりません: $ScriptPath" -ForegroundColor Red; exit 1 }
-if (!(Test-Path $ConfigPath)) { Write-Host "❌ config ディレクトリが見つかりません: $ConfigPath" -ForegroundColor Red; exit 1 }
+if (!(Test-Path $ScriptPath)) { Write-Host "scripts ディレクトリが見つかりません: $ScriptPath" -ForegroundColor Red; exit 1 }
+if (!(Test-Path $ConfigPath)) { Write-Host "config ディレクトリが見つかりません: $ConfigPath" -ForegroundColor Red; exit 1 }
 
 # --- ps1ファイルのブロック解除 ---
 Write-Host "ps1 ファイルのブロックを解除しています..."
@@ -127,7 +127,7 @@ Set-Alias pdx-build (Join-Path `$ScriptPath 'build.ps1') -ErrorAction SilentlyCo
 "@
 
 # --- Pandocker プロファイルを作成・上書き ---
-Write-Host "🧩 Pandocker 専用プロファイルを作成・更新: $PandockerProfile"
+Write-Host "Pandocker 専用プロファイルを作成・更新: $PandockerProfile"
 Set-Content -Path $PandockerProfile -Value $pdxContent -Encoding UTF8
 
 # --- 現行ホストのプロファイルを確認 ---
@@ -151,15 +151,24 @@ if (Test-Path -Path $PROFILE -PathType Leaf) {
 
 # .Contains() メソッドで読み込み行が既に含まれているかを確認します
 if (-not ($profileContentRaw.Contains($includeLine))) {
-    Write-Host "🔗 現行プロファイルから Pandocker プロファイルを読み込むよう設定: $PROFILE"
+    Write-Host "現行プロファイルから Pandocker プロファイルを読み込むよう設定: $PROFILE"
     Add-Content -Path $PROFILE -Value "`n# Load Pandocker profile`n$includeLine`n"
 } else {
-    Write-Host "🔁 既に Pandocker プロファイルが読み込み設定済み。"
+    Write-Host "既に Pandocker プロファイルが読み込み設定済み。"
+}
+
+Write-Host "現在のセッションに関数を読み込んでいます..."
+try {
+    # . $PROFILE ではなく、作成した専用プロファイル($PandockerProfile)を読み込む
+    . $PandockerProfile
+} catch {
+    Write-Host "エラー: プロファイルの読み込みに失敗しました。" -ForegroundColor Red
+    Write-Host $_
 }
 
 # --- 完了メッセージ ---
-Write-Host "`n✅ セットアップ完了！PowerShellを再起動、または次を実行してください：" -ForegroundColor Green
-Write-Host "    . `$PROFILE"
+Write-Host "`n セットアップ完了！pdx コマンドがこのまま使用できます：" -ForegroundColor Green
 Write-Host "    pdx setup"
-Write-Host "    pdx-setup (エイリアス)"
+Write-Host "    pdx new <ProjectName>"
+Write-Host "    pdx build <ProjectName> [options]"
 Write-Host "`n※ pdx関数はローカル 'Documents\\PowerShell\\Pandocker_profile.ps1' に登録されました。" -ForegroundColor Cyan
