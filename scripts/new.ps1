@@ -1,8 +1,5 @@
 ﻿# new.ps1
 # 新しいレポートプロジェクトのひな形を作成する
-#
-# 使い方:
-#   ./new.ps1 "新しいレポート名"
 
 param (
     [Parameter(Position=0, Mandatory=$true)]
@@ -12,9 +9,10 @@ param (
 # --- 1. スクリプトのメイン処理 ---
 
 # 実行カレントディレクトリ（プロジェクトルート）を取得
-$WorkDir = (Get-Location).Path
+$ScriptPath = $PSScriptRoot
+$PdxRoot = Split-Path $ScriptPath -Parent
 # プロジェクトを格納するベースディレクトリを設定
-$ProjectsBaseDir = Join-Path -Path $WorkDir -ChildPath "projects"
+$ProjectsBaseDir = Join-Path -Path $PdxRoot -ChildPath "projects"
 
 # 'projects' ディレクトリがなければ作成する
 if (-not (Test-Path -Path $ProjectsBaseDir)) {
@@ -71,7 +69,7 @@ Write-Host "  - MDテンプレート 'report.md' を作成中..."
 Set-Content -Path $reportMdPath -Value $reportMdContent -Encoding UTF8
 
 # 8. プロジェクトルートにある defaults.yml をコピー
-$sourceDefaultsPath = Join-Path -Path $WorkDir -ChildPath "defaults.yml"
+$sourceDefaultsPath = Join-Path -Path $PdxRoot -ChildPath "defaults.yml"
 $targetDefaultsPath = Join-Path -Path $targetReportDir -ChildPath "defaults.yml"
 
 if (Test-Path -Path $sourceDefaultsPath) {

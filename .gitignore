@@ -68,3 +68,5 @@ projects/**
 !projects/sample-report/**/defaults.yml
 !projects/sample-report/**/report.md
 !projects/sample-report/**/references.bib
+
+.codex/
