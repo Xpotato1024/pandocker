@@ -70,3 +70,4 @@ projects/**
 !projects/sample-report/**/references.bib
 
 .codex/
+.doc/

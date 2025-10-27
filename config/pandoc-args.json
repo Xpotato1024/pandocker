@@ -1,0 +1,7 @@
+{
+  "pdf_args": [
+    "-F", "pandoc-crossref",
+    "--citeproc",
+    "-M", "listings"
+  ]
+}

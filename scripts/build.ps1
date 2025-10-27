@@ -21,6 +21,19 @@ try {
     return
 }
 
+# --- 1.1 Pandoc引数設定JSONを読み込む ---
+$PandocArgsJsonPath = Join-Path $ConfigPath "pandoc-args.json"
+if (-not (Test-Path $PandocArgsJsonPath)) {
+    Write-Host "エラー: Pandoc引数設定ファイル(pandoc-args.json)が見つかりません。" -ForegroundColor Red
+    return
+}
+try {
+    $PandocArgsConfig = Get-Content -Raw -Path $PandocArgsJsonPath | ConvertFrom-Json
+} catch {
+    Write-Host "エラー: pandoc-args.json の解析に失敗しました。" -ForegroundColor Red
+    return
+}
+
 # --- 2. ビルド対象ファイルの決定 ---
 if ([string]::IsNullOrEmpty($ReportName)) {
     Write-Host "エラー: ビルド対象のプロジェクト名が指定されていません。" -ForegroundColor Red
@@ -76,7 +89,13 @@ foreach ($InputFile in $InputFiles) {
     $ContainerWorkDir = "/data/projects/$ReportName/src"
     $Defaults = "../defaults.yml"
     $OutputFile = "../output/${ReportName}_${FileBase}.pdf"
-    $PandocArgs = "--defaults '$Defaults' -F pandoc-crossref '$InputFile' -o '$OutputFile' --citeproc -M listings"
+    $PandocArgsArray = @($PandocArgsConfig.pdf_args)
+    
+    $PandocArgsArray += @("--defaults", "'$Defaults'")
+    $PandocArgsArray += @("'$InputFile'")
+    $PandocArgsArray += @("-o", "'$OutputFile'")
+
+    $PandocArgs = $PandocArgsArray -join " "
 
     if ($Log.IsPresent) {
         $PandocArgs += " --verbose"
