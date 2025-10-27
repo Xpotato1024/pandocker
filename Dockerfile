@@ -62,6 +62,11 @@ RUN wget "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pand
 
 # ====== Stage 2: 最終的な実行環境の設定 ======
 
+# ローカルの CSL と Preamble ファイルをイメージ内の固定パスにコピー
+# (defaults.yml や report.md から絶対パスで参照される)
+COPY csl /app/csl
+COPY preamble /app/preamble
+
 # インストールが正しく行われたかを確認
 RUN pandoc --version && pandoc-crossref --version && lualatex --version
 

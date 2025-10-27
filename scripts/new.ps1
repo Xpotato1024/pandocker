@@ -59,7 +59,7 @@ title: "Title"
 author: "name"
 date: "{0}"
 bibliography: ../bib/references.bib
-csl: ../../../csl/ieee-with-url.csl
+csl: /app/csl/ieee-with-url.csl
 ---
 
 # section

@@ -24,13 +24,13 @@ metadata:
   reference-section-title: "参考文献"
 
 include-in-header:
-  - "../../../preamble/preamble-main.tex" #基本パッケージ
-  - "../../../preamble/preamble-chem.tex"  #化学パッケージ
-  - "../../../preamble/preamble-mathphys.tex"  #数学物理パッケージ
-  - "../../../preamble/preamble-tikz.tex"  #tikzパッケージ
-  - "../../../preamble/preamble-table.tex"  #テーブルパッケージ
-  - "../../../preamble/preamble-code.tex"  #コードパッケージ
-  - "../../../preamble/preamble-links.tex"  #リンクパッケージ
+  - "/app/preamble/preamble-main.tex" #基本パッケージ
+  - "/app/preamble/preamble-chem.tex"  #化学パッケージ
+  - "/app/preamble/preamble-mathphys.tex"  #数学物理パッケージ
+  - "/app/preamble/preamble-tikz.tex"  #tikzパッケージ
+  - "/app/preamble/preamble-table.tex"  #テーブルパッケージ
+  - "/app/preamble/preamble-code.tex"  #コードパッケージ
+  - "/app/preamble/preamble-links.tex"  #リンクパッケージ
 
 # ----------------------------------------------------
 # Pandocテンプレート（LaTeX）用の変数

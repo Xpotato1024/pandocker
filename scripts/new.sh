@@ -20,7 +20,7 @@ REPORT_NAME="$1"
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 PDX_ROOT=$(dirname "$SCRIPT_DIR")
 PROJECTS_BASE_DIR="$PDX_ROOT/projects"
-CSL_PATH_FROM_SRC="../../../csl/ieee-with-url.csl" # (new.ps1 と同一)
+CSL_PATH_FROM_SRC="/app/csl/ieee-with-url.csl"
 
 # 'projects' ディレクトリがなければ作成する
 mkdir -p "$PROJECTS_BASE_DIR"

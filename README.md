@@ -1,11 +1,11 @@
 # Pandocker-X: Markdown → PDF 日本語自動ビルド環境
 
-[![GitHub release](https://img.shields.io/badge/release-v2.0.0--alpha-blue)](https://github.com/Xpotato1024/Pandocker-X/releases/tag/v2.0.0-alpha)
+[![GitHub release](https://img.shields.io/badge/release-v2.1.0--alpha-blue)](https://github.com/Xpotato1024/Pandocker-X/releases/tag/v2.1.0-alpha)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 概要
 
-Pandocker は **Docker (Windows/Linux/Mac)** 上で動作する、Pandoc + LuaLaTeX + pandoc-crossref 環境です。Markdown から高品質な日本語 PDF を自動生成できます。
+Pandocker-X は **Docker (Windows/Linux/Mac)** 上で動作する、Pandoc + LuaLaTeX + pandoc-crossref 環境です。Markdown から高品質な日本語 PDF を自動生成できます。
 
 `install.ps1` (Windows) または `install.sh` (Linux/Mac) による初回セットアップ後は、`pdx` コマンドを実行するだけで、レポートの雛形作成から PDF のビルドまでをワンコマンドで完結させます。
 
@@ -20,6 +20,11 @@ Pandocker は **Docker (Windows/Linux/Mac)** 上で動作する、Pandoc + LuaLa
 * **雛形生成:** `pdx new "project"` でレポートプロジェクトを自動作成。
 
 * **ビルド設定の外部化:** `config/pandoc-args.json` でPandocの共通引数を管理。
+
+* **引用スタイル (CSL) の柔軟性:**
+    * デフォルトのIEEEスタイルに加え、一般的なスタイル (APA, MLA, Chicagoなど) を同梱予定。
+    * `report.md` のYAMLヘッダーを編集するだけでスタイルを切り替え可能。
+    * プロジェクト内に独自のCSLファイルを追加して使用することも可能。
 
 * **高品質な組版:** LuaLaTeX による美しい日本語文書出力。
 
@@ -45,7 +50,7 @@ Pandocker は **Docker (Windows/Linux/Mac)** 上で動作する、Pandoc + LuaLa
 
 ## ディレクトリ構成
 
-```
+~~~
 .
 │  Dockerfile              # PandocとTeX環境を構築するDocker設定
 │  docker-compose.yml      # コンテナ実行を自動化するCompose定義
@@ -72,7 +77,10 @@ Pandocker は **Docker (Windows/Linux/Mac)** 上で動作する、Pandoc + LuaLa
 │    uninstall.sh          # [Linux/Mac用] アンインストーラ
 │
 ├─csl/
-│    ieee-with-url.csl     # 引用スタイル設定ファイル
+│    ieee-with-url.csl     # デフォルトの引用スタイル
+│    apa.csl                # (例) 追加する一般的なCSLファイル
+│    mla.csl                # (例)
+│    ...
 │
 ├─log/
 │    (pandoc_*.log)        # -Log オプション指定時に生成
@@ -87,7 +95,7 @@ Pandocker は **Docker (Windows/Linux/Mac)** 上で動作する、Pandoc + LuaLa
 │
 └─templates/
      pandoc.latex          # PandocのLaTeXテンプレート
-```
+~~~
 
 ## 使い方
 
@@ -105,21 +113,19 @@ Docker Desktop で PDF ビルド環境を正しく動作させるには、WSL �
 
 ### 1. 初回インストール (pdx コマンドの登録)
 
-[★変更]
-
 お使いのOSに合わせて、インストーラーを**一度だけ**実行します。
 
 #### Windows (PowerShell) の場合
 
 PowerShell を開き、プロジェクトのルートディレクトリで `install.ps1` を**ドットソース**で実行します。
 
-```
+~~~
 # 実行ポリシーがRestrictedの場合は先に変更が必要です
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # install.ps1 を実行して pdx 関数を登録 (先頭のドット(.)が重要です)
 . .\install.ps1
-```
+~~~
 
 `install.ps1` は `pdx` 関数をPowerShellプロファイルに登録し、現在のセッションに自動読み込みします。`pdx` コマンドが**そのまま使用可能**になります。
 
@@ -127,14 +133,14 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ターミナルを開き、プロジェクトのルートディレクトリで `install.sh` を **source** コマンドで実行します。
 
-```bash
+~~~bash
 # 実行権限を付与
 chmod +x install.sh
 chmod +x scripts/*.sh
 
 # install.sh を実行 (source または . が重要です)
 source ./install.sh
-```
+~~~
 
 `install.sh` は `pdx` 関数を `.bashrc` または `.zshrc` に登録し、現在のセッションに自動読み込みします。`pdx` コマンドが**そのまま使用可能**になります。
 
@@ -142,9 +148,9 @@ source ./install.sh
 
 `pdx` コマンドが使えるようになったら、Docker イメージと TeX Live 環境を構築します。
 
-```
+~~~
 pdx setup
-```
+~~~
 
 > ※ Windows ユーザーの場合: WSL のディストリビューション設定は `config/config.ps1` 内で行います。
 
@@ -152,9 +158,9 @@ pdx setup
 
 `pdx new` コマンドで `projects/` 配下に雛形を作成します。
 
-```
+~~~
 pdx new "report-name"
-```
+~~~
 
 * 引数1:作成するフォルダ名を指定
 
@@ -170,9 +176,9 @@ pdx new "report-name"
 
 `pdx build` コマンドで PDF を生成します。
 
-```
+~~~
 pdx build "report-name"
-```
+~~~
 
 * 引数1:作成したフォルダ名を指定
 
@@ -198,9 +204,9 @@ pdx build "report-name"
 
 ログ出力付きビルドも可能です。
 
-```
+~~~
 pdx build "report-name" -All -Log
-```
+~~~
 
 #### ファイル上書き防止
 
@@ -214,44 +220,65 @@ PDF 出力時は、入力ファイル名をもとにしたファイル名で保�
 
 > 基本的には作成したフォルダ内にあるdefaults.ymlを編集すること。
 
-* パッケージの設定  
-  パッケージは分野別にpreambleにして設定されています。必要に応じて削除・コメントアウトしてください。
+* **LaTeXパッケージの設定:**  
+  `include-in-header` で読み込む `/app/preamble/` 内の `.tex` ファイルを編集します。不要なパッケージをコメントアウトすることでビルド時間を短縮できます。
 
-```yaml
+~~~yaml
 include-in-header:
-  - "../../../preamble/preamble-main.tex" #基本パッケージ
-  - "../../../preamble/preamble-chem.tex"  #化学パッケージ
-  - "../../../preamble/preamble-mathphys.tex"  #数学物理パッケージ
-  - "../../../preamble/preamble-tikz.tex"  #tikzパッケージ
-  - "../../../preamble/preamble-table.tex"  #テーブルパッケージ
-  - "../../../preamble/preamble-code.tex"  #コードパッケージ
-  - "../../../preamble/preamble-links.tex"  #リンクパッケージ
-```
+  - "/app/preamble/preamble-main.tex" #基本パッケージ
+  - "/app/preamble/preamble-chem.tex"  #化学パッケージ
+  - "/app/preamble/preamble-mathphys.tex"  #数学物理パッケージ
+  - "/app/preamble/preamble-tikz.tex"  #tikzパッケージ
+  - "/app/preamble/preamble-table.tex"  #テーブルパッケージ
+  - "/app/preamble/preamble-code.tex"  #コードパッケージ
+  - "/app/preamble/preamble-links.tex"  #リンクパッケージ
+~~~
 
 例:TikZや化学式を使わない場合
 
-```yaml
-# - "../../../preamble/preamble-chem.tex"
-# - "../../../preamble/preamble-tikz.tex"
-```
+~~~yaml
+include-in-header:
+  - "/app/preamble/preamble-main.tex" #基本パッケージ
+  #- "/app/preamble/preamble-chem.tex"  #化学パッケージ
+  - "/app/preamble/preamble-mathphys.tex"  #数学物理パッケージ
+  #- "/app/preamble/preamble-tikz.tex"  #tikzパッケージ
+  - "/app/preamble/preamble-table.tex"  #テーブルパッケージ
+  - "/app/preamble/preamble-code.tex"  #コードパッケージ
+  - "/app/preamble/preamble-links.tex"  #リンクパッケージ
+~~~
 
-これによりビルド時の読み込み時間を短縮できます。
+### 引用スタイル (CSL) の変更
 
-### report.md のyamlヘッダー編集
+* **同梱スタイルへの切り替え:**
+    `report.md` のYAMLヘッダーにある `csl:` の値を、使用したいスタイルの **コンテナ内絶対パス** に変更します。同梱されているスタイルは `/app/csl/` ディレクトリ内にあります (ファイル名は異なる場合があります)。
 
-* 引用スタイルを変更
+    ~~~yaml
+    ---
+    title: "Title"
+    author: "Your Name"
+    date: "..."
+    bibliography: ../bib/references.bib
+    csl: /app/csl/apa.csl # ここを /app/csl/mla.csl などに変更
+    ---
+    ~~~
 
-例:
+    **同梱される引用スタイル:**
+    * IEEE (デフォルト): `ieee-with-url.csl`
+    * APA: `apa.csl`
+    * MLA: `mla.csl`
+    * Chicago (Author-Date): `chicago-author-date.csl`
+    * Vancouver: `vancouver.csl`
+    * (他のスタイルも `pdx setup`実行前に`csl/` フォルダに追加してください)
 
-```yaml
----
-title: "Title"
-author: "Your Name"
-date: "2025-10-22"
-bibliography: ../bib/references.bib
-csl: ../../../csl/ieee-with-url.csl #ここを変更して引用スタイルを変更
----
-```
+* **カスタムCSLファイルの使用:**
+    1.  使用したい `.csl` ファイルを、ご自身のプロジェクトフォルダ内の分かりやすい場所 (例: `projects/report-name/custom-csl/my-style.csl`) に置きます。
+    2.  `report.md` のYAMLヘッダーの `csl:` の値を、**`src` ディレクトリから見た相対パス**に変更します。
+
+    ~~~yaml
+    ---
+    csl: ../custom-csl/my-style.csl # プロジェクト内のファイルへの相対パス
+    ---
+    ~~~
 
 ## ログとキャッシュ
 
