@@ -54,6 +54,7 @@ Pandocker は **Docker + Ubuntu(WSL2)** 上で動作する、Pandoc + LuaLaTeX +
 │    setup.ps1              # [★追加] 初回セットアップスクリプト (pdx setup が実行)
 │    wsl-helpers.ps1        # [★追加] WSL関連の補助関数
 │    wsl-init.ps1           # [★追加] WSL初期化の共通ロジック
+|    uninstall.ps1          # [★追加] install.ps1の影響をクリーンアップするアンインストーラ
 │
 ├─csl/
 │    ieee-with-url.csl     # IEEE形式（URL付き）の引用スタイル設定ファイル
