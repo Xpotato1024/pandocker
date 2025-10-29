@@ -159,6 +159,9 @@ $loadBlock = "`n$commentLine`n$includeLine`n" # 追加するブロック全体
 $profileContentRaw = ""
 if (Test-Path -Path $PROFILE -PathType Leaf) {
     $profileContentRaw = Get-Content -Path $PROFILE -Raw -ErrorAction SilentlyContinue
+    if ($null -eq $profileContentRaw) {
+        $profileContentRaw = ""
+    }
 }
 
 # .Contains() メソッドで読み込みブロックが既に含まれているかを確認します
