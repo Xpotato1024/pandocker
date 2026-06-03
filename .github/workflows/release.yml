@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version tag, for example v2.3.0-alpha"
+        description: "Release version tag, for example v2.3.2-alpha"
         required: true
         default: ""
 
@@ -15,7 +15,25 @@ permissions:
   contents: write
 
 jobs:
-  package-and-release:
+  resolve-version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+
+    steps:
+      - name: Resolve release version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.version }}" ]]; then
+            value="${{ inputs.version }}"
+          else
+            value="${{ github.ref_name }}"
+          fi
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+  windows-release:
+    needs: resolve-version
     runs-on: windows-2025
 
     steps:
@@ -36,30 +54,65 @@ jobs:
       - name: Package Windows release zip
         shell: pwsh
         run: |
-          $version = if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.version }}") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
-          & .\release\package-windows-release.ps1 -Version $version -Force
+          & .\release\package-windows-release.ps1 -Version "${{ needs.resolve-version.outputs.version }}" -Force
 
-      - name: Package source archive
-        shell: pwsh
-        run: |
-          $version = if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.version }}") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
-          New-Item -ItemType Directory -Force -Path release\dist | Out-Null
-          $archive = "release/dist/pandocker-x-source-$version.zip"
-          if (Test-Path $archive) { Remove-Item -LiteralPath $archive -Force }
-          & git archive --format=zip --prefix="pandocker-x-$version/" --output=$archive HEAD
-
-      - name: Upload packaged zips as artifact
-        if: github.event_name == 'workflow_dispatch'
+      - name: Upload Windows package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pandocker-release-packages
+          name: windows-release-packages
           path: release/dist/*.zip
 
+  unix-release:
+    needs: resolve-version
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Verify Unix entrypoint
+        shell: bash
+        run: bash -n pdx
+
+      - name: Package source archive
+        shell: bash
+        run: |
+          mkdir -p release/dist
+          archive="release/dist/pandocker-x-source-${{ needs.resolve-version.outputs.version }}.zip"
+          rm -f "$archive"
+          git archive --format=zip --prefix="pandocker-x-${{ needs.resolve-version.outputs.version }}/" --output="$archive" HEAD
+
+      - name: Upload Unix package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unix-release-packages
+          path: release/dist/*.zip
+
+  publish-release:
+    needs:
+      - resolve-version
+      - windows-release
+      - unix-release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download Windows package
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release-packages
+          path: release/dist
+
+      - name: Download Unix package
+        uses: actions/download-artifact@v4
+        with:
+          name: unix-release-packages
+          path: release/dist
+
       - name: Upload release assets
-        if: github.event_name == 'push'
         uses: softprops/action-gh-release@v3
         with:
           files: release/dist/*.zip
           generate_release_notes: true
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(needs.resolve-version.outputs.version, '-') }}
           fail_on_unmatched_files: true
