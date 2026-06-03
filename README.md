@@ -1,130 +1,99 @@
 # Pandocker-X
 
-[![最新リリース](https://img.shields.io/github/v/release/Xpotato1024/Pandocker-X?include_prereleases)](https://github.com/Xpotato1024/Pandocker-X/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+Pandocker-X is a Docker-based workflow for turning Markdown into PDF with Pandoc, LaTeX, CSL styles, and reusable project templates.
 
-Pandocker-X は、Markdown から PDF を作るための Docker ベースの環境です。
-Windows / Linux / macOS で、`pdx` コマンドからセットアップ・新規作成・PDF ビルドを行えます。
+This repository is the source of truth for:
 
-## 前提条件
+- project scaffolding
+- Docker image and build settings
+- Windows distribution binaries
+- Unix source-release entrypoints
 
-### 共通
-
-- `pandoc` を含むビルド環境は Docker コンテナ内で動作します
-- Windows から使う場合は WSL 2 が必要です
-
-### Windows 推奨構成
-
-- WSL 2 対応の Linux ディストリビューション
-- WSL 内で動作する `dockerd`
-- `docker` コマンドと `docker compose` プラグイン
-
-Docker Desktop は必須ではありません。必要なら `DockerBackend = "desktop"` に切り替えられますが、既定は WSL 内の `dockerd` です。
-`pdx setup` は `dockerd` が停止していれば起動を試み、`docker` / `docker compose` が未導入なら確認後に WSL 内へ導入します。
-
-## 導入
+## Supported entry points
 
 ### Windows
 
-GitHub Release では zip 形式で配布し、展開後に `pdx-bootstrap.exe` を直接実行してください。
+Windows users install the Rust-based binary distribution and run the workflow through WSL.
+
+- Release asset: `pandocker-x-windows-<version>.zip`
+- Entry script for local source checkouts: `install.ps1`
+- Runtime: WSL 2 plus Docker Desktop or WSL Docker
+
+Typical install command:
 
 ```powershell
 .\pdx-bootstrap.exe install
 ```
 
-`pdx-bootstrap.exe` は Rust 製の CLI installer で、`pdx.exe` を所定の場所へ配置して PowerShell 用の wrapper を登録します。
-GUI から導入したい場合は、同梱の `pdx-installer-gui.exe` を起動してください。
-
-- `tools/pdx-win/` に `pdx.exe`
-- `tools/pdx-installer/` に `pdx-bootstrap.exe`
-- `tools/pdx-installer/` に `pdx-installer-gui.exe`
-
-`install.ps1` はソースツリー用の補助です。リリースでは必須ではありません。
-
-詳細は [docs/windows-binary.md](docs/windows-binary.md) を参照してください。
-
-release 用の zip を作るには、`release/package-windows-release.ps1` を使います。
-
 ### Linux / macOS
 
-旧スクリプトは `legacy/` に退避しています。必要な場合は以下を使ってください。
+Linux and macOS users should use the source release or a local checkout and run the Unix `pdx` shell entrypoint.
+
+- Release asset: `pandocker-x-source-<version>.zip`
+- Entry script: `./pdx`
+- Runtime: Docker, Docker Compose, and `jq`
+
+Typical first-run commands:
 
 ```bash
-source ./legacy/install.sh
+./pdx setup
+./pdx new sample-report
+./pdx build sample-report
 ```
 
-## 使い方
+## Quick start
 
-### 初回セットアップ
+### Windows source checkout
 
 ```powershell
+.\install.ps1
 pdx setup
+pdx new sample-report
+pdx build sample-report
 ```
 
-### 新規作成
+### Unix source checkout or source release
 
-```powershell
-pdx new <プロジェクト名>
+```bash
+./pdx setup
+./pdx new sample-report
+./pdx build sample-report
 ```
 
-論文用の初期設定を使う場合は `-Paper` を付けます。
+## Repository layout
 
-```powershell
-pdx new <プロジェクト名> -Paper
-```
+- `config/` - runtime configuration and WSL helpers
+- `templates/` - templates used by `pdx new`
+- `preamble/` - LaTeX preamble fragments
+- `csl/` - citation styles
+- `tools/` - Rust binaries for Windows installation and setup
+- `projects/<name>/src/` - project source Markdown
+- `projects/<name>/output/` - generated PDFs
+- `docs/` - release, support, and roadmap documentation
 
-### ビルド
+## Release flow
 
-基本形は次の通りです。
+The intended public release flow is:
 
-```powershell
-pdx build <プロジェクト名>
-```
+1. Open or update an issue.
+2. Create a `codex/` branch.
+3. Commit the change.
+4. Push the branch.
+5. Open a PR.
+6. Merge the PR.
+7. Push a release tag such as `v1.2.3`.
 
-何も指定しない場合は、`projects/<プロジェクト名>/src/report.md` をビルドします。
+The detailed workflow lives in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-複数ファイルを分けてビルドする場合は、`プロジェクト名` の後ろに対象ファイル名を並べます。
-ファイル名は `projects/<プロジェクト名>/src/` からの相対パスです。
+## Documentation
 
-```powershell
-pdx build <プロジェクト名> chapter1.md chapter2.md appendix/appendix.md
-```
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [docs/windows-binary.md](docs/windows-binary.md)
+- [docs/roadmap.md](docs/roadmap.md)
+- [docs/build-metrics.md](docs/build-metrics.md)
 
-プロジェクト配下の Markdown をすべて再帰的にビルドする場合は `-All` を使います。
+## Notes
 
-```powershell
-pdx build <プロジェクト名> -All
-```
+- `legacy/` contains the historical shell and PowerShell scripts. They are kept for reference and fallback, not as the primary supported path.
+- GitHub release assets now include both the Windows binaries and a source archive for Unix users.
 
-ビルドログを保存する場合は `-Log` を併用します。
-
-```powershell
-pdx build <プロジェクト名> -All -Log
-```
-
-### オプションの整理
-
-- `pdx build` の第 1 引数はプロジェクト名です
-- その後ろに並ぶ引数はビルド対象ファイルです
-- `-All` は `src/` 配下の Markdown を再帰的に全部対象にします
-- `-Log` は `log/` に pandoc のログを保存します
-- 個別ファイル指定と `-All` は用途が異なるため、両方を混ぜないでください
-
-## 構成
-
-- `config/`: 実行時設定と Windows 向け補助ファイル
-- `templates/`: `pdx new` で使うテンプレート
-- `preamble/`: LaTeX の前処理
-- `csl/`: 引用スタイル
-- `tools/`: Windows 向け Rust バイナリ
-- `legacy/`: 旧スクリプトの保管場所
-- `projects/<名前>/src/`: 本文
-- `projects/<名前>/output/`: 生成物
-
-## 補足
-
-- `defaults-paper.yml` は `pdx new -Paper` でコピーされる論文向け初期設定です
-- `projects/sample-paper/` は挙動確認用のサンプルです
-- ビルド時間や PDF サイズの記録は [docs/build-metrics.md](docs/build-metrics.md) に追記できます
-- Windows release の zip 作成スクリプトは [release/package-windows-release.ps1](/C:/Users/miyut/Desktop/pandocker-dev/release/package-windows-release.ps1) です
-- Windows の既定バックエンドは WSL dockerd です。Docker Desktop は必要な場合のみ有効化してください

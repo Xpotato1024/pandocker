@@ -92,28 +92,29 @@ fn run_gui() -> Result<(), String> {
 
     let window_handle = ui.borrow().window.handle;
     let handler_ui = Rc::clone(&ui);
-    let handler = nwg::full_bind_event_handler(&window_handle, move |event, _event_data, handle| {
-        let ui = handler_ui.borrow();
-        match event {
-            nwg::Event::OnWindowClose => nwg::stop_thread_dispatch(),
-            nwg::Event::OnButtonClick if handle == ui.close_button.handle => {
-                nwg::stop_thread_dispatch();
+    let handler =
+        nwg::full_bind_event_handler(&window_handle, move |event, _event_data, handle| {
+            let ui = handler_ui.borrow();
+            match event {
+                nwg::Event::OnWindowClose => nwg::stop_thread_dispatch(),
+                nwg::Event::OnButtonClick if handle == ui.close_button.handle => {
+                    nwg::stop_thread_dispatch();
+                }
+                nwg::Event::OnButtonClick if handle == ui.install_button.handle => {
+                    let text = run_action(Command::Install, &ui.install_dir, &ui.profile_file);
+                    ui.status_text.set_text(&text);
+                }
+                nwg::Event::OnButtonClick if handle == ui.uninstall_button.handle => {
+                    let text = run_action(Command::Uninstall, &ui.install_dir, &ui.profile_file);
+                    ui.status_text.set_text(&text);
+                }
+                nwg::Event::OnButtonClick if handle == ui.status_button.handle => {
+                    let text = run_action(Command::Status, &ui.install_dir, &ui.profile_file);
+                    ui.status_text.set_text(&text);
+                }
+                _ => {}
             }
-            nwg::Event::OnButtonClick if handle == ui.install_button.handle => {
-                let text = run_action(Command::Install, &ui.install_dir, &ui.profile_file);
-                ui.status_text.set_text(&text);
-            }
-            nwg::Event::OnButtonClick if handle == ui.uninstall_button.handle => {
-                let text = run_action(Command::Uninstall, &ui.install_dir, &ui.profile_file);
-                ui.status_text.set_text(&text);
-            }
-            nwg::Event::OnButtonClick if handle == ui.status_button.handle => {
-                let text = run_action(Command::Status, &ui.install_dir, &ui.profile_file);
-                ui.status_text.set_text(&text);
-            }
-            _ => {}
-        }
-    });
+        });
 
     nwg::dispatch_thread_events();
     nwg::unbind_event_handler(&handler);
@@ -139,10 +140,15 @@ fn initial_text(install_dir: &std::path::Path, profile_file: &std::path::Path) -
     )
 }
 
-fn run_action(command: Command, install_dir: &std::path::Path, profile_file: &std::path::Path) -> String {
+fn run_action(
+    command: Command,
+    install_dir: &std::path::Path,
+    profile_file: &std::path::Path,
+) -> String {
     let options = InstallerOptions {
         command,
         source: None,
+        bundle_root: None,
         install_dir: install_dir.to_path_buf(),
         profile_file: profile_file.to_path_buf(),
     };

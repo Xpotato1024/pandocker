@@ -20,6 +20,7 @@ pub enum Command {
 pub struct InstallerOptions {
     pub command: Command,
     pub source: Option<PathBuf>,
+    pub bundle_root: Option<PathBuf>,
     pub install_dir: PathBuf,
     pub profile_file: PathBuf,
 }
@@ -41,6 +42,7 @@ where
 {
     let mut command = None;
     let mut source = None;
+    let mut bundle_root = None;
     let mut install_dir = default_install_dir()?;
     let mut profile_file = default_profile_file()?;
 
@@ -59,6 +61,12 @@ where
                     .next()
                     .ok_or_else(|| "--source expects a path".to_string())?;
                 source = Some(PathBuf::from(value));
+            }
+            "--bundle-root" => {
+                let value = iter
+                    .next()
+                    .ok_or_else(|| "--bundle-root expects a path".to_string())?;
+                bundle_root = Some(PathBuf::from(value));
             }
             "--install-dir" => {
                 let value = iter
@@ -90,6 +98,7 @@ where
     Ok(InstallerOptions {
         command: command.unwrap_or(Command::Install),
         source,
+        bundle_root,
         install_dir,
         profile_file,
     })
@@ -108,26 +117,28 @@ pub fn print_help() {
     println!();
     println!("Usage:");
     println!(
-        "  pdx-bootstrap install [--source <pdx.exe>] [--install-dir <dir>] [--profile-file <host-profile>]"
+        "  pdx-bootstrap install [--source <pdx.exe>] [--bundle-root <dir>] [--install-dir <dir>] [--profile-file <host-profile>]"
     );
     println!("  pdx-bootstrap uninstall [--install-dir <dir>] [--profile-file <host-profile>]");
     println!("  pdx-bootstrap status");
     println!();
     println!("Defaults:");
     println!("  install dir   : %LOCALAPPDATA%\\Pandocker-X\\bin");
-    println!("  profile file  : %USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1");
+    println!(
+        "  profile file  : %USERPROFILE%\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1"
+    );
     println!("  source binary : sibling pdx.exe next to pdx-bootstrap.exe");
 }
 
 pub fn default_install_dir() -> Result<PathBuf> {
-    let local_app_data = env::var_os("LOCALAPPDATA")
-        .ok_or_else(|| "%LOCALAPPDATA% is not set".to_string())?;
+    let local_app_data =
+        env::var_os("LOCALAPPDATA").ok_or_else(|| "%LOCALAPPDATA% is not set".to_string())?;
     Ok(PathBuf::from(local_app_data).join(APP_NAME).join("bin"))
 }
 
 pub fn default_profile_file() -> Result<PathBuf> {
-    let user_profile = env::var_os("USERPROFILE")
-        .ok_or_else(|| "%USERPROFILE% is not set".to_string())?;
+    let user_profile =
+        env::var_os("USERPROFILE").ok_or_else(|| "%USERPROFILE% is not set".to_string())?;
     Ok(PathBuf::from(user_profile)
         .join("Documents")
         .join("PowerShell")
@@ -152,12 +163,19 @@ fn install(options: &InstallerOptions) -> Result<Report> {
         )
     })?;
 
+    let bundle_root = resolve_bundle_root(options)?;
+    copy_bundle_resources(&bundle_root, &options.install_dir)?;
+
     let wrapper_file = wrapper_file_path(&options.profile_file);
     write_text(&wrapper_file, &render_wrapper(&installed_binary))?;
     ensure_profile_import(&options.profile_file, &wrapper_file)?;
 
     Ok(Report::new(vec![
-        format!("Installed {} to {}", BINARY_FILE_NAME, installed_binary.display()),
+        format!(
+            "Installed {} to {}",
+            BINARY_FILE_NAME,
+            installed_binary.display()
+        ),
         format!("Updated wrapper file: {}", wrapper_file.display()),
         format!("Updated host profile : {}", options.profile_file.display()),
     ]))
@@ -186,7 +204,11 @@ fn uninstall(options: &InstallerOptions) -> Result<Report> {
     }
 
     Ok(Report::new(vec![
-        format!("Removed {} from {}", BINARY_FILE_NAME, options.install_dir.display()),
+        format!(
+            "Removed {} from {}",
+            BINARY_FILE_NAME,
+            options.install_dir.display()
+        ),
         format!("Removed wrapper file: {}", wrapper_file.display()),
     ]))
 }
@@ -212,13 +234,101 @@ fn resolve_source_binary(options: &InstallerOptions) -> Result<PathBuf> {
         return Ok(source.clone());
     }
 
-    let exe = env::current_exe()
-        .map_err(|err| format!("failed to locate current executable: {err}"))?;
+    let exe =
+        env::current_exe().map_err(|err| format!("failed to locate current executable: {err}"))?;
     let sibling = exe
         .parent()
         .ok_or_else(|| "current executable has no parent directory".to_string())?
         .join(BINARY_FILE_NAME);
     Ok(sibling)
+}
+
+fn resolve_bundle_root(options: &InstallerOptions) -> Result<PathBuf> {
+    if let Some(bundle_root) = &options.bundle_root {
+        return Ok(bundle_root.clone());
+    }
+
+    let exe =
+        env::current_exe().map_err(|err| format!("failed to locate current executable: {err}"))?;
+    let root = exe
+        .parent()
+        .ok_or_else(|| "current executable has no parent directory".to_string())?;
+    Ok(root.to_path_buf())
+}
+
+fn copy_bundle_resources(bundle_root: &Path, install_dir: &Path) -> Result<()> {
+    for entry in [
+        "defaults.yml",
+        "defaults-paper.yml",
+        "Dockerfile",
+        "docker-compose.yml",
+        "README.md",
+        "LICENSE",
+    ] {
+        let source = bundle_root.join(entry);
+        if source.exists() {
+            copy_path(&source, &install_dir.join(entry))?;
+        }
+    }
+
+    for directory in ["config", "csl", "preamble", "templates"] {
+        let source = bundle_root.join(directory);
+        if source.exists() {
+            copy_tree(&source, &install_dir.join(directory))?;
+        }
+    }
+
+    let projects_source = bundle_root.join("projects");
+    if projects_source.exists() {
+        copy_tree(&projects_source, &install_dir.join("projects"))?;
+    } else {
+        fs::create_dir_all(install_dir.join("projects")).map_err(|err| {
+            format!(
+                "failed to create {}: {err}",
+                install_dir.join("projects").display()
+            )
+        })?;
+    }
+
+    Ok(())
+}
+
+fn copy_tree(source: &Path, destination: &Path) -> Result<()> {
+    if source.is_dir() {
+        fs::create_dir_all(destination)
+            .map_err(|err| format!("failed to create {}: {err}", destination.display()))?;
+        for entry in fs::read_dir(source)
+            .map_err(|err| format!("failed to read {}: {err}", source.display()))?
+        {
+            let entry =
+                entry.map_err(|err| format!("failed to read {}: {err}", source.display()))?;
+            let path = entry.path();
+            let target = destination.join(entry.file_name());
+            if path.is_dir() {
+                copy_tree(&path, &target)?;
+            } else {
+                copy_path(&path, &target)?;
+            }
+        }
+        Ok(())
+    } else {
+        copy_path(source, destination)
+    }
+}
+
+fn copy_path(source: &Path, destination: &Path) -> Result<()> {
+    if let Some(parent) = destination.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|err| format!("failed to create {}: {err}", parent.display()))?;
+    }
+    fs::copy(source, destination).map_err(|err| {
+        format!(
+            "failed to copy {} to {}: {err}",
+            source.display(),
+            destination.display()
+        )
+    })?;
+    Ok(())
 }
 
 fn wrapper_file_path(profile_file: &Path) -> PathBuf {
@@ -332,7 +442,10 @@ fn remove_profile_import(content: &str, wrapper_file: &Path) -> String {
 }
 
 fn profile_import_line(wrapper_file: &Path) -> String {
-    format!(". \"{}\"", powershell_double_quote(&wrapper_file.to_string_lossy()))
+    format!(
+        ". \"{}\"",
+        powershell_double_quote(&wrapper_file.to_string_lossy())
+    )
 }
 
 fn powershell_double_quote(value: &str) -> String {

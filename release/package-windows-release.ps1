@@ -40,6 +40,7 @@ Install:
 2. Run `.\pdx-bootstrap.exe install` from PowerShell, Command Prompt, or Explorer.
 3. Restart PowerShell if the pdx wrapper is not available immediately.
 4. If you prefer a GUI, launch `pdx-installer-gui.exe` from the same folder.
+5. The installer copies the bundled runtime files into `%LOCALAPPDATA%\Pandocker-X\bin`.
 
 If you are using the source tree instead of a release zip, you can still run `install.ps1` from the repository root.
 '@ -f $VersionText | Set-Content -Path $Path -Encoding UTF8
@@ -48,15 +49,12 @@ If you are using the source tree instead of a release zip, you can still run `in
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $pdxExe = Resolve-ExistingPath @(
     (Join-Path $BinaryDir 'pdx-win\target\release\pdx.exe')
-    (Join-Path $BinaryDir 'pdx-win\target\debug\pdx.exe')
 )
 $bootstrapExe = Resolve-ExistingPath @(
     (Join-Path $BinaryDir 'pdx-installer\target\release\pdx-bootstrap.exe')
-    (Join-Path $BinaryDir 'pdx-installer\target\debug\pdx-bootstrap.exe')
 )
 $guiExe = Resolve-ExistingPath @(
     (Join-Path $BinaryDir 'pdx-installer\target\release\pdx-installer-gui.exe')
-    (Join-Path $BinaryDir 'pdx-installer\target\debug\pdx-installer-gui.exe')
 )
 
 if (-not $pdxExe) {
@@ -81,6 +79,26 @@ try {
     Copy-Item -LiteralPath $bootstrapExe -Destination (Join-Path $stagingRoot 'pdx-bootstrap.exe')
     Copy-Item -LiteralPath $guiExe -Destination (Join-Path $stagingRoot 'pdx-installer-gui.exe')
     Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $stagingRoot 'LICENSE')
+
+    foreach ($path in @(
+        'defaults.yml'
+        'defaults-paper.yml'
+        'Dockerfile'
+        'docker-compose.yml'
+        'README.md'
+    )) {
+        Copy-Item -LiteralPath (Join-Path $repoRoot $path) -Destination (Join-Path $stagingRoot $path)
+    }
+
+    foreach ($directory in @(
+        'config'
+        'csl'
+        'preamble'
+        'templates'
+        'projects'
+    )) {
+        Copy-Item -LiteralPath (Join-Path $repoRoot $directory) -Destination (Join-Path $stagingRoot $directory) -Recurse -Force
+    }
 
     $installNote = Join-Path $stagingRoot 'INSTALL.txt'
     Write-InstallNote -Path $installNote -VersionText $Version
