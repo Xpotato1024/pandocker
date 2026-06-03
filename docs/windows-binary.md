@@ -5,7 +5,7 @@ This repository is moving the Windows entrypoint from PowerShell scripts to Rust
 ## Current layout
 
 - `tools/pdx-win/` contains the Windows command binary, `pdx.exe`.
-- `tools/pdx-installer/` contains the installer binary, `pdx-bootstrap.exe`.
+- `tools/pdx-installer/` contains the installer binaries, `pdx-bootstrap.exe` and `pdx-installer-gui.exe`.
 - `install.ps1` is a source-tree convenience script only. It is not required for GitHub releases.
 
 ## Build
@@ -22,6 +22,7 @@ The release binaries will be written to:
 ```text
 tools/pdx-win/target/release/pdx.exe
 tools/pdx-installer/target/release/pdx-bootstrap.exe
+tools/pdx-installer/target/release/pdx-installer-gui.exe
 ```
 
 If the machine does not have the Windows linker toolchain installed, build with the Visual Studio C++ build tools or from a Developer PowerShell session.
@@ -44,6 +45,7 @@ Build flags:
 For GitHub releases, distribute a zip archive that contains at least these files:
 
 - `pdx-bootstrap.exe`
+- `pdx-installer-gui.exe`
 - `pdx.exe`
 
 After extracting the zip, run the installer directly from PowerShell, Command Prompt, or Explorer:
@@ -52,7 +54,8 @@ After extracting the zip, run the installer directly from PowerShell, Command Pr
 .\pdx-bootstrap.exe install
 ```
 
-The installer is a normal CLI executable. A GUI installer package can be added later if the release flow needs one, but it is not required for the current design.
+The installer is a normal CLI executable.
+The GUI installer is bundled in the same zip and can be launched directly without any PowerShell wrapper.
 
 For local source checkouts, `install.ps1` can still bootstrap the same installer and command binary from the repository tree.
 
@@ -68,6 +71,7 @@ For GitHub releases, ship these artifacts together inside a zip:
 
 - `pdx.exe`
 - `pdx-bootstrap.exe`
+- `pdx-installer-gui.exe`
 
 That keeps Windows installation self-contained while avoiding an unnecessary PowerShell-only entrypoint.
 

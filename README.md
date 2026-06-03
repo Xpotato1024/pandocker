@@ -16,10 +16,12 @@ GitHub Release では zip 形式で配布し、展開後に `pdx-bootstrap.exe` 
 .\pdx-bootstrap.exe install
 ```
 
-`pdx-bootstrap.exe` は Rust 製の installer で、`pdx.exe` を所定の場所へ配置して PowerShell 用の wrapper を登録します。
+`pdx-bootstrap.exe` は Rust 製の CLI installer で、`pdx.exe` を所定の場所へ配置して PowerShell 用の wrapper を登録します。
+GUI から導入したい場合は、同梱の `pdx-installer-gui.exe` を起動してください。
 
 - `tools/pdx-win/` に `pdx.exe`
 - `tools/pdx-installer/` に `pdx-bootstrap.exe`
+- `tools/pdx-installer/` に `pdx-installer-gui.exe`
 
 `install.ps1` はソースツリー用の補助です。リリースでは必須ではありません。
 

@@ -3,8 +3,18 @@ name = "pdx-installer"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+path = "src/lib.rs"
+
 [[bin]]
 name = "pdx-bootstrap"
 path = "src/main.rs"
+
+[[bin]]
+name = "pdx-installer-gui"
+path = "src/gui.rs"
+
+[target.'cfg(windows)'.dependencies]
+native-windows-gui = "1"
 
 [dependencies]

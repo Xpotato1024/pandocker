@@ -1,0 +1,58 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version tag, for example v2.3.0-alpha"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  package-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build pdx.exe
+        shell: pwsh
+        run: |
+          & "$env:USERPROFILE\.cargo\bin\cargo.exe" build --release --manifest-path tools/pdx-win/Cargo.toml
+
+      - name: Build installer binaries
+        shell: pwsh
+        run: |
+          & "$env:USERPROFILE\.cargo\bin\cargo.exe" build --release --manifest-path tools/pdx-installer/Cargo.toml
+
+      - name: Package Windows release zip
+        shell: pwsh
+        run: |
+          $version = if ("${{ github.event_name }}" -eq "workflow_dispatch" -and "${{ inputs.version }}") { "${{ inputs.version }}" } else { "${{ github.ref_name }}" }
+          & .\release\package-windows-release.ps1 -Version $version -Force
+
+      - name: Upload packaged zip as artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release-zip
+          path: release/dist/*.zip
+
+      - name: Upload release artifact
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/dist/*.zip
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true

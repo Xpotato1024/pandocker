@@ -26,21 +26,23 @@ function Resolve-ExistingPath {
 function Write-InstallNote {
     param([string]$Path, [string]$VersionText)
 
-    @"
-Pandocker-X Windows Release $VersionText
+    @'
+Pandocker-X Windows Release {0}
 
 Contents:
 - pdx.exe
 - pdx-bootstrap.exe
+- pdx-installer-gui.exe
 - LICENSE
 
 Install:
 1. Extract this zip archive.
 2. Run `.\pdx-bootstrap.exe install` from PowerShell, Command Prompt, or Explorer.
 3. Restart PowerShell if the pdx wrapper is not available immediately.
+4. If you prefer a GUI, launch `pdx-installer-gui.exe` from the same folder.
 
 If you are using the source tree instead of a release zip, you can still run `install.ps1` from the repository root.
-"@ | Set-Content -Path $Path -Encoding UTF8
+'@ -f $VersionText | Set-Content -Path $Path -Encoding UTF8
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
@@ -52,6 +54,10 @@ $bootstrapExe = Resolve-ExistingPath @(
     (Join-Path $BinaryDir 'pdx-installer\target\release\pdx-bootstrap.exe')
     (Join-Path $BinaryDir 'pdx-installer\target\debug\pdx-bootstrap.exe')
 )
+$guiExe = Resolve-ExistingPath @(
+    (Join-Path $BinaryDir 'pdx-installer\target\release\pdx-installer-gui.exe')
+    (Join-Path $BinaryDir 'pdx-installer\target\debug\pdx-installer-gui.exe')
+)
 
 if (-not $pdxExe) {
     throw 'pdx.exe was not found. Build tools/pdx-win first.'
@@ -59,6 +65,10 @@ if (-not $pdxExe) {
 
 if (-not $bootstrapExe) {
     throw 'pdx-bootstrap.exe was not found. Build tools/pdx-installer first.'
+}
+
+if (-not $guiExe) {
+    throw 'pdx-installer-gui.exe was not found. Build tools/pdx-installer first.'
 }
 
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
@@ -69,6 +79,7 @@ New-Item -ItemType Directory -Force -Path $stagingRoot | Out-Null
 try {
     Copy-Item -LiteralPath $pdxExe -Destination (Join-Path $stagingRoot 'pdx.exe')
     Copy-Item -LiteralPath $bootstrapExe -Destination (Join-Path $stagingRoot 'pdx-bootstrap.exe')
+    Copy-Item -LiteralPath $guiExe -Destination (Join-Path $stagingRoot 'pdx-installer-gui.exe')
     Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE') -Destination (Join-Path $stagingRoot 'LICENSE')
 
     $installNote = Join-Path $stagingRoot 'INSTALL.txt'
