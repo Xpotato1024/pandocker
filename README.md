@@ -1,91 +1,113 @@
-# Pandocker-X: Markdown to PDF
+# Pandocker-X
 
-[![GitHub release](https://img.shields.io/github/v/release/Xpotato1024/Pandocker-X?include_prereleases)](https://github.com/Xpotato1024/Pandocker-X/releases)
+[![最新リリース](https://img.shields.io/github/v/release/Xpotato1024/Pandocker-X?include_prereleases)](https://github.com/Xpotato1024/Pandocker-X/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Pandocker-X is a Docker-based Markdown-to-PDF workflow for Windows, Linux, and macOS.
+Pandocker-X は、Markdown から PDF を作るための Docker ベースの環境です。
+Windows / Linux / macOS で、`pdx` コマンドからセットアップ・新規作成・PDF ビルドを行えます。
 
-## Install
+## 導入
 
 ### Windows
 
-Run `install.ps1` from the repository root.
+リポジトリのルートで `install.ps1` をドットソースして実行してください。
 
 ```powershell
 . .\install.ps1
 ```
 
-That bootstrapper launches the Rust installer and registers the PowerShell wrapper that exposes `pdx`.
+このスクリプトは Rust 製の installer を呼び出し、`pdx` を使えるように PowerShell の wrapper を登録します。
 
-- `tools/pdx-win/` provides `pdx.exe`
-- `tools/pdx-installer/` provides `pdx-bootstrap.exe`
+- `tools/pdx-win/` に `pdx.exe`
+- `tools/pdx-installer/` に `pdx-bootstrap.exe`
 
-For GitHub release bundles, place these files side by side:
+GitHub Release で配布する場合は、次の 3 つを同じ場所に置きます。
 
 - `install.ps1`
 - `pdx.exe`
 - `pdx-bootstrap.exe`
 
-See [docs/windows-binary.md](docs/windows-binary.md) for the current Windows binary guide.
+詳細は [docs/windows-binary.md](docs/windows-binary.md) を参照してください。
 
 ### Linux / macOS
 
-Use the legacy shell installer under `legacy/` if you need the old flow.
+旧スクリプトは `legacy/` に退避しています。必要な場合は以下を使ってください。
 
 ```bash
 source ./legacy/install.sh
 ```
 
-## Usage
+## 使い方
 
-Set up the environment:
+### 初回セットアップ
 
 ```powershell
 pdx setup
 ```
 
-Create a project:
+### 新規作成
 
 ```powershell
-pdx new "report-name"
+pdx new <プロジェクト名>
 ```
 
-Build a PDF:
+論文用の初期設定を使う場合は `-Paper` を付けます。
 
 ```powershell
-pdx build "report-name"
+pdx new <プロジェクト名> -Paper
 ```
 
-Build all Markdown files in a project:
+### ビルド
+
+基本形は次の通りです。
 
 ```powershell
-pdx build "report-name" -All
+pdx build <プロジェクト名>
 ```
 
-Write pandoc logs:
+何も指定しない場合は、`projects/<プロジェクト名>/src/report.md` をビルドします。
+
+複数ファイルを分けてビルドする場合は、`プロジェクト名` の後ろに対象ファイル名を並べます。
+ファイル名は `projects/<プロジェクト名>/src/` からの相対パスです。
 
 ```powershell
-pdx build "report-name" -All -Log
+pdx build <プロジェクト名> chapter1.md chapter2.md appendix/appendix.md
 ```
 
-## Windows Guide
+プロジェクト配下の Markdown をすべて再帰的にビルドする場合は `-All` を使います。
 
-The Windows packaging flow, build steps, and release layout are documented in [docs/windows-binary.md](docs/windows-binary.md).
+```powershell
+pdx build <プロジェクト名> -All
+```
 
-## Notes
+ビルドログを保存する場合は `-Log` を併用します。
 
-- `legacy/` contains the previous shell and PowerShell entrypoints.
-- `defaults-paper.yml` is the paper preset copied by `pdx new -Paper`.
-- `projects/sample-paper/` is the bundled example project.
-- Build timings can be recorded in [docs/build-metrics.md](docs/build-metrics.md).
+```powershell
+pdx build <プロジェクト名> -All -Log
+```
 
-## Project Layout
+### オプションの整理
 
-- `config/`: runtime configuration and Windows helpers
-- `templates/`: pandoc templates
-- `preamble/`: LaTeX preamble files
-- `csl/`: citation style files
-- `tools/`: Rust binaries for Windows
-- `legacy/`: archived script entrypoints
-- `projects/<name>/src/`: project sources
-- `projects/<name>/output/`: generated PDFs
+- `pdx build` の第 1 引数はプロジェクト名です
+- その後ろに並ぶ引数はビルド対象ファイルです
+- `-All` は `src/` 配下の Markdown を再帰的に全部対象にします
+- `-Log` は `log/` に pandoc のログを保存します
+- 個別ファイル指定と `-All` は用途が異なるため、両方を混ぜないでください
+
+## 構成
+
+- `config/`: 実行時設定と Windows 向け補助ファイル
+- `templates/`: `pdx new` で使うテンプレート
+- `preamble/`: LaTeX の前処理
+- `csl/`: 引用スタイル
+- `tools/`: Windows 向け Rust バイナリ
+- `legacy/`: 旧スクリプトの保管場所
+- `projects/<名前>/src/`: 本文
+- `projects/<名前>/output/`: 生成物
+
+## 補足
+
+- `defaults-paper.yml` は `pdx new -Paper` でコピーされる論文向け初期設定です
+- `projects/sample-paper/` は挙動確認用のサンプルです
+- ビルド時間や PDF サイズの記録は [docs/build-metrics.md](docs/build-metrics.md) に追記できます
+
