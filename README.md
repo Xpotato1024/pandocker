@@ -10,22 +10,18 @@ Windows / Linux / macOS で、`pdx` コマンドからセットアップ・新�
 
 ### Windows
 
-リポジトリのルートで `install.ps1` をドットソースして実行してください。
+GitHub Release では zip 形式で配布し、展開後に `pdx-bootstrap.exe` を直接実行してください。
 
 ```powershell
-. .\install.ps1
+.\pdx-bootstrap.exe install
 ```
 
-このスクリプトは Rust 製の installer を呼び出し、`pdx` を使えるように PowerShell の wrapper を登録します。
+`pdx-bootstrap.exe` は Rust 製の installer で、`pdx.exe` を所定の場所へ配置して PowerShell 用の wrapper を登録します。
 
 - `tools/pdx-win/` に `pdx.exe`
 - `tools/pdx-installer/` に `pdx-bootstrap.exe`
 
-GitHub Release で配布する場合は、次の 3 つを同じ場所に置きます。
-
-- `install.ps1`
-- `pdx.exe`
-- `pdx-bootstrap.exe`
+`install.ps1` はソースツリー用の補助です。リリースでは必須ではありません。
 
 詳細は [docs/windows-binary.md](docs/windows-binary.md) を参照してください。
 
@@ -110,4 +106,3 @@ pdx build <プロジェクト名> -All -Log
 - `defaults-paper.yml` は `pdx new -Paper` でコピーされる論文向け初期設定です
 - `projects/sample-paper/` は挙動確認用のサンプルです
 - ビルド時間や PDF サイズの記録は [docs/build-metrics.md](docs/build-metrics.md) に追記できます
-
