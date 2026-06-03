@@ -6,7 +6,7 @@
 
 - 実行日時
 - OS / backend
-- Docker Desktop か WSL dockerd か
+- WSL dockerd か Docker Desktop か
 - `docker compose build --no-cache` の所要時間
 - `pdx setup` の所要時間
 - 1 回目の `pdx build` の所要時間
@@ -42,7 +42,7 @@ time docker compose build --no-cache
 
 | 日時 | OS | Backend | `pdx setup` | `pdx build` | PDF size | 備考 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-06-02 16:00 | Windows 11 | Docker Desktop | - | - | - | 例 |
+| 2026-06-02 16:00 | Windows 11 | WSL dockerd | - | - | - | 例 |
 
 ## メモ
 

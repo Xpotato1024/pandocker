@@ -39,7 +39,7 @@ impl AppConfig {
             wsl_work_dir_name: extract_string(&text, "WslWorkDirName")
                 .unwrap_or_else(|| "pandocker_work".to_string()),
             docker_backend: extract_string(&text, "DockerBackend")
-                .unwrap_or_else(|| "desktop".to_string()),
+                .unwrap_or_else(|| "wsl-dockerd".to_string()),
             sync_mode: match extract_string(&text, "SyncMode").as_deref() {
                 Some("project-only") => SyncMode::ProjectOnly,
                 Some("none") => SyncMode::None,

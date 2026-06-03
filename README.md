@@ -6,6 +6,21 @@
 Pandocker-X は、Markdown から PDF を作るための Docker ベースの環境です。
 Windows / Linux / macOS で、`pdx` コマンドからセットアップ・新規作成・PDF ビルドを行えます。
 
+## 前提条件
+
+### 共通
+
+- `pandoc` を含むビルド環境は Docker コンテナ内で動作します
+- Windows から使う場合は WSL 2 が必要です
+
+### Windows 推奨構成
+
+- WSL 2 対応の Linux ディストリビューション
+- WSL 内で動作する `dockerd`
+- `docker` コマンドと `docker compose` プラグイン
+
+Docker Desktop は必須ではありません。必要なら `DockerBackend = "desktop"` に切り替えられますが、既定は WSL 内の `dockerd` です。
+
 ## 導入
 
 ### Windows
@@ -111,3 +126,4 @@ pdx build <プロジェクト名> -All -Log
 - `projects/sample-paper/` は挙動確認用のサンプルです
 - ビルド時間や PDF サイズの記録は [docs/build-metrics.md](docs/build-metrics.md) に追記できます
 - Windows release の zip 作成スクリプトは [release/package-windows-release.ps1](/C:/Users/miyut/Desktop/pandocker-dev/release/package-windows-release.ps1) です
+- Windows の既定バックエンドは WSL dockerd です。Docker Desktop は必要な場合のみ有効化してください

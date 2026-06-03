@@ -7,14 +7,15 @@
 # ご自身の環境に合わせて値を変更してください。
 
 $PandockerConfig = @{
-    # Docker Desktopと連携しているWSLディストリビューション名
+    # Pandocker を動かす WSL ディストリビューション名
     WslDistro = "Ubuntu"
 
     # WSL内に作成される作業ディレクトリ名
     WslWorkDirName = "pandocker_work"
 
     # Docker の接続先
-    DockerBackend = "desktop"
+    # 既定は WSL 内の dockerd を使う。Docker Desktop を使う場合は desktop に変更する。
+    DockerBackend = "wsl-dockerd"
 
     # WSL への同期方法
     SyncMode = "mirror-repo"
