@@ -25,6 +25,8 @@ GitHub Release では zip 形式で配布し、展開後に `pdx-bootstrap.exe` 
 
 詳細は [docs/windows-binary.md](docs/windows-binary.md) を参照してください。
 
+release 用の zip を作るには、`release/package-windows-release.ps1` を使います。
+
 ### Linux / macOS
 
 旧スクリプトは `legacy/` に退避しています。必要な場合は以下を使ってください。
@@ -106,3 +108,4 @@ pdx build <プロジェクト名> -All -Log
 - `defaults-paper.yml` は `pdx new -Paper` でコピーされる論文向け初期設定です
 - `projects/sample-paper/` は挙動確認用のサンプルです
 - ビルド時間や PDF サイズの記録は [docs/build-metrics.md](docs/build-metrics.md) に追記できます
+- Windows release の zip 作成スクリプトは [release/package-windows-release.ps1](/C:/Users/miyut/Desktop/pandocker-dev/release/package-windows-release.ps1) です

@@ -71,6 +71,8 @@ For GitHub releases, ship these artifacts together inside a zip:
 
 That keeps Windows installation self-contained while avoiding an unnecessary PowerShell-only entrypoint.
 
+The zip packaging script lives at [release/package-windows-release.ps1](/C:/Users/miyut/Desktop/pandocker-dev/release/package-windows-release.ps1).
+
 ## Notes
 
 - The legacy `scripts/*.ps1` and `scripts/*.sh` files still exist under `legacy/`, but Windows users should treat the binary path as the supported entrypoint.
