@@ -12,4 +12,10 @@ $PandockerConfig = @{
 
     # WSL内に作成される作業ディレクトリ名
     WslWorkDirName = "pandocker_work"
+
+    # Docker の接続先
+    DockerBackend = "desktop"
+
+    # WSL への同期方法
+    SyncMode = "mirror-repo"
 }

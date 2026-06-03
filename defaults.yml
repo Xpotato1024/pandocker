@@ -5,6 +5,7 @@
 reader: markdown
 writer: pdf
 pdf-engine: lualatex
+template: /app/templates/pandoc.latex
 highlight-style: tango
 
 # ----------------------------------------------------

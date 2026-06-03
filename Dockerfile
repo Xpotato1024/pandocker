@@ -66,6 +66,7 @@ RUN wget "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pand
 # (defaults.yml や report.md から絶対パスで参照される)
 COPY csl /app/csl
 COPY preamble /app/preamble
+COPY templates /app/templates
 
 # インストールが正しく行われたかを確認
 RUN pandoc --version && pandoc-crossref --version && lualatex --version
