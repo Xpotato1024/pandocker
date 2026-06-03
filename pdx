@@ -41,11 +41,16 @@ Usage:
   pdx setup
   pdx new <ProjectName> [-Paper]
   pdx build <ProjectName> [options]
+  pdx --version
 
 Build options:
   -All    Build every Markdown file under src/
   -Log    Save pandoc output to log/
 EOF
+}
+
+print_version() {
+    echo "Pandocker-X shell entrypoint 0.1.1"
 }
 
 setup_project() {
@@ -275,6 +280,9 @@ main() {
     case "$1" in
         -h|--help|help)
             usage
+            ;;
+        -V|--version|version)
+            print_version
             ;;
         setup)
             shift

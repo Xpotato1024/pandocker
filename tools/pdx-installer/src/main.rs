@@ -12,7 +12,17 @@ fn main() -> ExitCode {
 }
 
 fn real_main() -> Result<(), String> {
-    let args = parse_args(std::env::args().skip(1).collect::<Vec<_>>())?;
+    let raw_args = std::env::args().skip(1).collect::<Vec<_>>();
+    if raw_args
+        .first()
+        .map(|arg| matches!(arg.as_str(), "-V" | "--version" | "version"))
+        .unwrap_or(false)
+    {
+        println!("Pandocker-X installer {}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
+
+    let args = parse_args(raw_args)?;
     let report = run(&args)?;
     for line in report.lines {
         println!("{line}");

@@ -34,6 +34,10 @@ fn real_main() -> Result<()> {
         print_usage();
         return Ok(());
     }
+    if is_version_flag(&args[0]) {
+        print_version();
+        return Ok(());
+    }
 
     let command = args
         .remove(0)
@@ -63,6 +67,13 @@ fn is_help_flag(arg: &OsString) -> bool {
     matches!(arg.to_str(), Some("-h") | Some("--help") | Some("help"))
 }
 
+fn is_version_flag(arg: &OsString) -> bool {
+    matches!(
+        arg.to_str(),
+        Some("-V") | Some("--version") | Some("version")
+    )
+}
+
 fn print_usage() {
     println!("Pandocker-X Windows binary");
     println!();
@@ -74,6 +85,10 @@ fn print_usage() {
     println!("Build options:");
     println!("  -All    Build every Markdown file under src/");
     println!("  -Log    Save pandoc output to log/");
+}
+
+fn print_version() {
+    println!("Pandocker-X Windows binary {}", env!("CARGO_PKG_VERSION"));
 }
 
 fn cmd_new(repo_root: &Path, args: &[OsString]) -> Result<()> {
