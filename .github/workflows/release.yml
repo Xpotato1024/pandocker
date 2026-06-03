@@ -109,10 +109,26 @@ jobs:
           name: unix-release-packages
           path: release/dist
 
+      - name: Create checksum file
+        shell: bash
+        run: |
+          cd release/dist
+          sha256sum pandocker-x-*.zip > "pandocker-x-checksums-${{ needs.resolve-version.outputs.version }}.sha256"
+
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          cat > release-notes.md <<EOF
+          Checksum asset: \`pandocker-x-checksums-${{ needs.resolve-version.outputs.version }}.sha256\`
+
+          Verify downloads with \`sha256sum -c pandocker-x-checksums-${{ needs.resolve-version.outputs.version }}.sha256\` on Unix-like systems or by comparing \`Get-FileHash\` output on Windows.
+          EOF
+
       - name: Upload release assets
         uses: softprops/action-gh-release@v3
         with:
-          files: release/dist/*.zip
+          body_path: release-notes.md
+          files: release/dist/*
           generate_release_notes: true
           prerelease: ${{ contains(needs.resolve-version.outputs.version, '-') }}
           fail_on_unmatched_files: true

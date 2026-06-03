@@ -1,25 +1,26 @@
 # Pandocker-X
 
-Pandocker-X is a Docker-based workflow for turning Markdown into PDF with Pandoc, LaTeX, CSL styles, and reusable project templates.
+Pandocker-X は、Markdown を Pandoc と LaTeX で PDF に変換するための Docker ベースのワークフローです。
 
-This repository is the source of truth for:
+このリポジトリは、次の内容に対する source of truth です。
 
-- project scaffolding
-- Docker image and build settings
-- Windows distribution binaries
-- Unix source-release entrypoints
+- プロジェクト雛形
+- Docker イメージとビルド設定
+- Windows 向け配布バイナリ
+- Linux / macOS 向け source release の起点
 
-## Supported entry points
+## 利用方法
 
 ### Windows
 
-Windows users install the Rust-based binary distribution and run the workflow through WSL.
+Windows では、Rust 製の配布バイナリをインストールして WSL 経由で使います。
 
-- Release asset: `pandocker-x-windows-<version>.zip`
-- Entry script for local source checkouts: `install.ps1`
-- Runtime: WSL 2 plus Docker Desktop or WSL Docker
+- release asset: `pandocker-x-windows-<version>.zip`
+- checksum asset: `pandocker-x-checksums-<version>.sha256`
+- ローカル checkout 用の導入スクリプト: `install.ps1`
+- 実行環境: WSL 2、Docker Desktop または WSL Docker
 
-Typical install command:
+インストール後の典型的な実行例:
 
 ```powershell
 .\pdx-bootstrap.exe install
@@ -27,13 +28,14 @@ Typical install command:
 
 ### Linux / macOS
 
-Linux and macOS users should use the source release or a local checkout and run the Unix `pdx` shell entrypoint.
+Linux と macOS では、source release かローカル checkout を使い、ルート直下の Unix `pdx` を実行します。
 
-- Release asset: `pandocker-x-source-<version>.zip`
-- Entry script: `./pdx`
-- Runtime: Docker, Docker Compose, and `jq`
+- release asset: `pandocker-x-source-<version>.zip`
+- checksum asset: `pandocker-x-checksums-<version>.sha256`
+- エントリポイント: `./pdx`
+- 実行環境: Docker、Docker Compose、`jq`
 
-Typical first-run commands:
+初回実行の例:
 
 ```bash
 ./pdx setup
@@ -41,9 +43,9 @@ Typical first-run commands:
 ./pdx build sample-report
 ```
 
-## Quick start
+## クイックスタート
 
-### Windows source checkout
+### Windows の source checkout
 
 ```powershell
 .\install.ps1
@@ -52,7 +54,7 @@ pdx new sample-report
 pdx build sample-report
 ```
 
-### Unix source checkout or source release
+### Linux / macOS の source checkout または source release
 
 ```bash
 ./pdx setup
@@ -60,40 +62,49 @@ pdx build sample-report
 ./pdx build sample-report
 ```
 
-## Repository layout
+## ディレクトリ構成
 
-- `config/` - runtime configuration and WSL helpers
-- `templates/` - templates used by `pdx new`
-- `preamble/` - LaTeX preamble fragments
-- `csl/` - citation styles
-- `tools/` - Rust binaries for Windows installation and setup
-- `projects/<name>/content/` - project Markdown source
-- `projects/<name>/output/` - generated PDFs
-- `docs/` - release, support, and roadmap documentation
+- `config/` - 実行設定と WSL ヘルパー
+- `templates/` - `pdx new` が使うテンプレート
+- `preamble/` - LaTeX の preamble 断片
+- `csl/` - 引用スタイル
+- `tools/` - Windows 導入と setup 用の Rust バイナリ
+- `projects/<name>/content/` - Markdown 本文
+- `projects/<name>/output/` - 生成済み PDF
+- `docs/` - release、support、roadmap の文書
 
-## Release flow
+## Release の流れ
 
-The intended public release flow is:
+公開 release は次の流れで進めます。
 
-1. Open or update an issue.
-2. Create a `codex/` branch.
-3. Commit the change.
-4. Push the branch.
-5. Open a PR.
-6. Merge the PR.
-7. Push a release tag such as `v1.2.3`.
+1. Issue を作成または更新する。
+2. `codex/` プレフィックスの branch を切る。
+3. 変更を commit する。
+4. branch を push する。
+5. PR を作る。
+6. レビュー後に merge する。
+7. `v1.2.3` のような release tag を push する。
 
-The detailed workflow lives in [CONTRIBUTING.md](CONTRIBUTING.md).
+詳しい運用は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
-## Documentation
+## OSS 向けの案内
+
+- License は [MIT License](LICENSE) です。
+- 変更提案は [CONTRIBUTING.md](CONTRIBUTING.md) に従ってください。
+- Security report は [SECURITY.md](SECURITY.md) を参照してください。
+- Release asset には Windows zip、source archive、checksum file が含まれます。検証手順は [docs/release.md](docs/release.md) を参照してください。
+
+## 文書
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [docs/release.md](docs/release.md)
 - [docs/windows-binary.md](docs/windows-binary.md)
 - [docs/roadmap.md](docs/roadmap.md)
 - [docs/build-metrics.md](docs/build-metrics.md)
 
-## Notes
+## 補足
 
-- `legacy/` contains the historical shell and PowerShell scripts. They are kept for reference and fallback, not as the primary supported path.
-- GitHub release assets now include both the Windows binaries and a source archive for Unix users.
+- `legacy/` には旧来の shell / PowerShell スクリプトがあります。参照・互換用であり、主要な導線ではありません。
+- GitHub release asset には Windows binaries、Unix 向け source archive、checksum file が含まれます。
 

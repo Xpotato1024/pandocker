@@ -61,6 +61,12 @@ The Windows release zip contains:
 - `LICENSE`
 - `README.md`
 
+The release page also includes a checksum file:
+
+- `pandocker-x-checksums-<version>.sha256`
+
+Use it to verify the downloaded archives before installing.
+
 After extracting the zip, run the bootstrapper:
 
 ```powershell
