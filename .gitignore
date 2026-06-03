@@ -77,3 +77,4 @@ projects/**
 .doc/
 tools/pdx-win/target/
 tools/*/target/
+release/dist/
