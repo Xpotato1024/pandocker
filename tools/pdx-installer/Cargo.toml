@@ -1,0 +1,10 @@
+[package]
+name = "pdx-installer"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "pdx-bootstrap"
+path = "src/main.rs"
+
+[dependencies]

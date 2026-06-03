@@ -1,23 +1,21 @@
-﻿---
+---
 title: "Title"
 author: "name"
-date: "2025-10-26"
+date: "{{DATE}}"
 bibliography: ../bib/references.bib
-csl: ../../../csl/ieee-with-url.csl
+csl: "{{CSL_PATH}}"
 ---
 
-## 実験の感想
+## 概要
 
-## 実験の目的
+ここにレポートの要旨を書きます。
 
-## 実験手法・理論
+## 目的
 
-### 実験の概要
+## 手法
 
-### 理論および計測・計算の流れ
+## 結果
 
-### 実験手法
-
-## 実験結果・考察
+## 考察
 
 ## 結論
