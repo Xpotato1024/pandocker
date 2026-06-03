@@ -72,6 +72,7 @@ if ($null -eq $Installer) {
     }
 
     $installerArgs += @('--profile-file', $ProfileFile)
+    $installerArgs += @('--bundle-root', $ScriptRoot)
 
     & $cargo.Source @installerArgs
 }
@@ -88,6 +89,7 @@ else {
     }
 
     $installerArgs += @('--profile-file', $ProfileFile)
+    $installerArgs += @('--bundle-root', $ScriptRoot)
 
     & $Installer @installerArgs
 }

@@ -156,21 +156,30 @@ fn cmd_setup(repo_root: &Path, config: &AppConfig) -> Result<()> {
         "cd {} && docker compose build",
         shell_quote_single(&wsl_project_root)
     );
-    run_wsl_shell(&config.wsl_distro, &command)?;
+    let status = run_wsl_shell(&config.wsl_distro, &command)?;
+    if status != 0 {
+        return Err("docker compose build failed during setup.".to_string());
+    }
 
     println!("[4/5] Preparing Docker volumes...");
     let command = format!(
         "cd {} && docker compose up -d --no-deps pandoc >/dev/null && docker compose stop pandoc >/dev/null",
         shell_quote_single(&wsl_project_root)
     );
-    run_wsl_shell(&config.wsl_distro, &command)?;
+    let status = run_wsl_shell(&config.wsl_distro, &command)?;
+    if status != 0 {
+        return Err("failed to prepare Docker volumes during setup.".to_string());
+    }
 
     println!("[5/5] Generating TeX Live formats...");
     let command = format!(
         "cd {} && docker compose run --rm --entrypoint bash pandoc -lc 'fmtutil-sys --all'",
         shell_quote_single(&wsl_project_root)
     );
-    run_wsl_shell(&config.wsl_distro, &command)?;
+    let status = run_wsl_shell(&config.wsl_distro, &command)?;
+    if status != 0 {
+        return Err("TeX Live format generation failed during setup.".to_string());
+    }
 
     println!("=== Setup complete ===");
     println!("You can now run pdx new / pdx build.");
@@ -240,6 +249,7 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
         .join(&report_name)
         .join("src");
     let host_log_dir = repo_root.join("log");
+    let mut had_failure = false;
 
     if parsed.log {
         ensure_dir(&PathBuf::from(&wsl_project_root_win).join("log"))?;
@@ -249,6 +259,7 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
         let host_input_path = src_dir.join(&input_file);
         if !host_input_path.exists() {
             println!("Warning: missing {}, skipping.", host_input_path.display());
+            had_failure = true;
             continue;
         }
 
@@ -267,6 +278,7 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
                 "Warning: missing {}, skipping.",
                 input_path_on_wsl.display()
             );
+            had_failure = true;
             continue;
         }
 
@@ -365,6 +377,7 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
             );
         } else {
             println!("{relative_path_posix} PDF generation failed.");
+            had_failure = true;
             if let Some(log_name) = &log_file_name {
                 println!("See {}\\{log_name} for details.", host_log_dir.display());
             }
@@ -380,6 +393,10 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
             copy_file(&source, &destination)?;
             println!("Log saved to: log\\{log_name}");
         }
+    }
+
+    if had_failure {
+        return Err("one or more Markdown files failed to build.".to_string());
     }
 
     Ok(())

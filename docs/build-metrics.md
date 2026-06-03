@@ -1,22 +1,18 @@
 # Build Metrics
 
-この文書は、Docker backend 切り替えやテンプレート変更の影響を確認するための記録用メモです。
+This document is a lightweight template for recording build and release observations.
 
-## 記録項目
+## What to record
 
-- 実行日時
-- OS / backend
-- WSL dockerd か Docker Desktop か
-- `docker compose build --no-cache` の所要時間
-- `pdx setup` の所要時間
-- `pdx setup` で `dockerd` を起動したかどうか
-- `pdx setup` で `docker` / `docker compose` を導入したかどうか
-- 1 回目の `pdx build` の所要時間
-- 2 回目の `pdx build` の所要時間
-- 生成 PDF のサイズ
-- エラー有無
+- Date and time
+- OS and backend
+- Whether `pdx setup` completed successfully
+- Whether `pdx build` completed successfully
+- Build duration
+- PDF size
+- Any errors or warnings
 
-## 推奨コマンド
+## Example commands
 
 ### Windows / PowerShell
 
@@ -25,29 +21,32 @@ git status --short
 docker version
 docker compose version
 pdx setup
-pdx new "sample-check"
-pdx build "sample-paper"
-pdx build "sample-paper" -Log
+pdx new sample-check
+pdx build sample-paper
+pdx build sample-paper -Log
 ```
 
-### Linux / WSL
+### Linux / Unix shell
 
 ```bash
 docker version
 docker compose version
 docker info
-systemctl is-active docker || pgrep dockerd
-time docker compose build --no-cache
+./pdx setup
+./pdx new sample-check
+./pdx build sample-paper
+./pdx build sample-paper -Log
 ```
 
-## 記録例
+## Tracking table
 
-| 日時 | OS | Backend | `pdx setup` | `pdx build` | PDF size | 備考 |
+| Date | OS | Backend | `pdx setup` | `pdx build` | PDF size | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-06-02 16:00 | Windows 11 | WSL dockerd | - | - | - | 例 |
+| 2026-06-02 16:00 | Windows 11 | WSL dockerd | - | - | - | initial template |
 
-## メモ
+## Notes
 
-- まず `sample-paper` で確認する。
-- 変更前後で同じ条件をできるだけ揃える。
-- `-Log` を付けたビルドは、失敗時の差分確認に使う。
+- Record a sample project before and after changes so regressions are visible.
+- Use `-Log` when you need a failure trace.
+- Add a new row for each meaningful validation run.
+
