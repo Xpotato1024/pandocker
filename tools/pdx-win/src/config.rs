@@ -1,3 +1,4 @@
+use crate::bootstrap::ensure_wsl_docker_runtime;
 use crate::fsutil::read_text;
 use crate::wsl::{run_command_capture, run_wsl_shell};
 use std::path::{Path, PathBuf};
@@ -102,27 +103,16 @@ impl AppConfig {
             ));
         }
 
-        let probe = "docker version >/dev/null && docker compose version >/dev/null";
         match self.docker_backend.as_str() {
             "desktop" => {
+                let probe = "docker version >/dev/null && docker compose version >/dev/null";
                 let status = run_wsl_shell(&self.wsl_distro, probe)?;
                 if status != 0 {
                     return Err("cannot connect to Docker Desktop from WSL. Enable WSL Integration in Docker Desktop.".to_string());
                 }
             }
             "wsl-dockerd" => {
-                let status = run_wsl_shell(&self.wsl_distro, probe)?;
-                if status != 0 {
-                    return Err("docker / docker compose is not available in WSL.".to_string());
-                }
-
-                let status = run_wsl_shell(
-                    &self.wsl_distro,
-                    "systemctl is-active docker >/dev/null 2>&1 || pgrep dockerd >/dev/null 2>&1",
-                )?;
-                if status != 0 {
-                    return Err("dockerd is not running. Start it with `systemctl start docker` or launch dockerd manually.".to_string());
-                }
+                ensure_wsl_docker_runtime(&self.wsl_distro)?;
             }
             other => {
                 return Err(format!("unsupported DockerBackend '{other}'."));

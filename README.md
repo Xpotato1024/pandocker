@@ -20,6 +20,7 @@ Windows / Linux / macOS で、`pdx` コマンドからセットアップ・新�
 - `docker` コマンドと `docker compose` プラグイン
 
 Docker Desktop は必須ではありません。必要なら `DockerBackend = "desktop"` に切り替えられますが、既定は WSL 内の `dockerd` です。
+`pdx setup` は `dockerd` が停止していれば起動を試み、`docker` / `docker compose` が未導入なら確認後に WSL 内へ導入します。
 
 ## 導入
 

@@ -9,6 +9,8 @@
 - WSL dockerd か Docker Desktop か
 - `docker compose build --no-cache` の所要時間
 - `pdx setup` の所要時間
+- `pdx setup` で `dockerd` を起動したかどうか
+- `pdx setup` で `docker` / `docker compose` を導入したかどうか
 - 1 回目の `pdx build` の所要時間
 - 2 回目の `pdx build` の所要時間
 - 生成 PDF のサイズ

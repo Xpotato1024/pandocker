@@ -56,6 +56,7 @@ After extracting the zip, run the installer directly from PowerShell, Command Pr
 
 The installer is a normal CLI executable.
 The GUI installer is bundled in the same zip and can be launched directly without any PowerShell wrapper.
+When you run `pdx setup`, it will try to start `dockerd` if it is stopped and will ask before installing missing `docker` / `docker compose` packages inside WSL.
 
 For local source checkouts, `install.ps1` can still bootstrap the same installer and command binary from the repository tree.
 
