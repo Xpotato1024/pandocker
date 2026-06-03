@@ -67,12 +67,12 @@ fn print_usage() {
     println!("Pandocker-X Windows binary");
     println!();
     println!("Usage:");
-    println!("  pdx new <ReportName> [-Paper]");
+    println!("  pdx new <ProjectName> [-Paper]");
     println!("  pdx build <ProjectName> [options]");
     println!("  pdx setup");
     println!();
     println!("Build options:");
-    println!("  -All    Build every Markdown file under src/");
+    println!("  -All    Build every Markdown file under the project source directory");
     println!("  -Log    Save pandoc output to log/");
 }
 
@@ -91,7 +91,7 @@ fn cmd_new(repo_root: &Path, args: &[OsString]) -> Result<()> {
         }
     }
 
-    let report_name = report_name.ok_or_else(|| "report name is required".to_string())?;
+    let report_name = report_name.ok_or_else(|| "project name is required".to_string())?;
     let projects_base = repo_root.join("projects");
     let target_dir = projects_base.join(&report_name);
     let template_path = repo_root.join("templates").join("report.md");
@@ -107,7 +107,7 @@ fn cmd_new(repo_root: &Path, args: &[OsString]) -> Result<()> {
     }
 
     println!("Creating 'projects/{report_name}'...");
-    for dir in ["src", "images", "bib", "output"] {
+    for dir in ["content", "images", "bib", "output"] {
         ensure_dir(&target_dir.join(dir))?;
     }
 
@@ -116,7 +116,7 @@ fn cmd_new(repo_root: &Path, args: &[OsString]) -> Result<()> {
     let mut template = read_text(&template_path)?;
     template = template.replace("{{DATE}}", &Local::now().format("%Y-%m-%d").to_string());
     template = template.replace("{{CSL_PATH}}", "/app/csl/ieee-with-url.csl");
-    write_text(&target_dir.join("src").join("report.md"), &template)?;
+    write_text(&target_dir.join("content").join("report.md"), &template)?;
 
     if defaults_path.exists() {
         copy_file(&defaults_path, &target_dir.join("defaults.yml"))?;
@@ -129,7 +129,7 @@ fn cmd_new(repo_root: &Path, args: &[OsString]) -> Result<()> {
 
     println!();
     println!("Project 'projects/{report_name}' is ready.");
-    println!("Edit projects/{report_name}/src/report.md to start writing.");
+    println!("Edit projects/{report_name}/content/report.md to start writing.");
     if paper {
         println!("Paper preset enabled: defaults.yml was copied from defaults-paper.yml.");
     }
@@ -191,7 +191,7 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
 
     let parsed = parse_build_args(args)?;
     let report_name = parsed.report_name.ok_or_else(|| {
-        "report name is required\nUsage: pdx build <ProjectName> [options]".to_string()
+        "project name is required\nUsage: pdx build <ProjectName> [options]".to_string()
     })?;
 
     let pandoc_args_path = repo_root.join("config").join("pandoc-args.json");
@@ -214,12 +214,12 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
     println!("[1/3] Syncing workspace to WSL...");
     config.sync_workspace(repo_root)?;
 
-    let src_dir = repo_root.join("projects").join(&report_name).join("src");
+    let source_dir = resolve_project_source_dir(repo_root, &report_name)?;
     let mut input_files = if parsed.all {
-        if src_dir.exists() {
-            list_markdown_files(&src_dir)?
+        if source_dir.exists() {
+            list_markdown_files(&source_dir)?
         } else {
-            println!("Warning: {} not found", src_dir.display());
+            println!("Warning: {} not found", source_dir.display());
             Vec::new()
         }
     } else if parsed.input_files.is_empty() {
@@ -244,10 +244,10 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
 
     let wsl_project_root_unix = config.wsl_project_root_unix()?;
     let wsl_project_root_win = config.wsl_project_root_win(&wsl_project_root_unix)?;
-    let wsl_src_dir = PathBuf::from(&wsl_project_root_win)
+    let wsl_source_dir = PathBuf::from(&wsl_project_root_win)
         .join("projects")
         .join(&report_name)
-        .join("src");
+        .join(source_dir_name(&source_dir));
     let host_log_dir = repo_root.join("log");
     let mut had_failure = false;
 
@@ -256,14 +256,14 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
     }
 
     for input_file in input_files.drain(..) {
-        let host_input_path = src_dir.join(&input_file);
+        let host_input_path = source_dir.join(&input_file);
         if !host_input_path.exists() {
             println!("Warning: missing {}, skipping.", host_input_path.display());
             had_failure = true;
             continue;
         }
 
-        let relative_path = relative_path(&src_dir, &host_input_path)?;
+        let relative_path = relative_path(&source_dir, &host_input_path)?;
         let relative_path_posix = relative_path.to_string_lossy().replace('\\', "/");
         let relative_output_path_posix = replace_extension(&relative_path_posix, "pdf");
         let relative_output_dir = relative_path
@@ -272,7 +272,7 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
             .unwrap_or_default();
         let relative_output_dir_posix = relative_output_dir.replace('\\', "/");
 
-        let input_path_on_wsl = wsl_src_dir.join(&relative_path);
+        let input_path_on_wsl = wsl_source_dir.join(&relative_path);
         if !input_path_on_wsl.exists() {
             println!(
                 "Warning: missing {}, skipping.",
@@ -296,7 +296,10 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
         };
         ensure_dir(&output_dir_wsl)?;
 
-        let container_work_dir = format!("/data/projects/{report_name}/src");
+        let container_work_dir = format!(
+            "/data/projects/{report_name}/{}",
+            source_dir_name(&source_dir)
+        );
         let defaults = "../defaults.yml";
         let output_file = format!("../output/{relative_output_path_posix}");
         let output_dir = if relative_output_dir_posix.is_empty() {
@@ -400,6 +403,26 @@ fn cmd_build(repo_root: &Path, config: &AppConfig, args: &[OsString]) -> Result<
     }
 
     Ok(())
+}
+
+fn resolve_project_source_dir(repo_root: &Path, report_name: &str) -> Result<PathBuf> {
+    let project_root = repo_root.join("projects").join(report_name);
+    let candidates = ["content", "src"];
+    for candidate in candidates {
+        let path = project_root.join(candidate);
+        if path.exists() {
+            return Ok(path);
+        }
+    }
+
+    Ok(project_root.join("content"))
+}
+
+fn source_dir_name(source_dir: &Path) -> &'static str {
+    match source_dir.file_name().and_then(|name| name.to_str()) {
+        Some("src") => "src",
+        _ => "content",
+    }
 }
 
 struct BuildArgs {

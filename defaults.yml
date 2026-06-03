@@ -1,41 +1,31 @@
-# Pandoc Defaults File
-# ===============================================
-
-# --- 入力と出力 ---
 reader: markdown
 writer: pdf
 pdf-engine: lualatex
 template: /app/templates/pandoc.latex
 highlight-style: tango
 
-# ----------------------------------------------------
-# pandoc-crossref フィルタ用のメタデータ
-# ----------------------------------------------------
 metadata:
   figureTitle: "図 "
   tableTitle: "表 "
   eqTitle: "式 "
-  listingTitle: "リスト "
+  listingTitle: "コード "
   figPrefix:
     - "図."
     - "図."
   tblPrefix: "表."
   eqnPrefix: "式."
-  lstPrefix: "リスト."
+  lstPrefix: "コード."
   reference-section-title: "参考文献"
 
 include-in-header:
-  - "/app/preamble/preamble-main.tex" #基本パッケージ
-  - "/app/preamble/preamble-chem.tex"  #化学パッケージ
-  - "/app/preamble/preamble-mathphys.tex"  #数学物理パッケージ
-  - "/app/preamble/preamble-tikz.tex"  #tikzパッケージ
-  - "/app/preamble/preamble-table.tex"  #テーブルパッケージ
-  - "/app/preamble/preamble-code.tex"  #コードパッケージ
-  - "/app/preamble/preamble-links.tex"  #リンクパッケージ
+  - "/app/preamble/preamble-main.tex"
+  - "/app/preamble/preamble-chem.tex"
+  - "/app/preamble/preamble-mathphys.tex"
+  - "/app/preamble/preamble-tikz.tex"
+  - "/app/preamble/preamble-table.tex"
+  - "/app/preamble/preamble-code.tex"
+  - "/app/preamble/preamble-links.tex"
 
-# ----------------------------------------------------
-# Pandocテンプレート（LaTeX）用の変数
-# ----------------------------------------------------
 variables:
   lang: ja-JP
   documentclass: ltjsarticle

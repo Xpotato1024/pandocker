@@ -21,9 +21,9 @@ git status --short
 docker version
 docker compose version
 pdx setup
-pdx new sample-check
-pdx build sample-paper
-pdx build sample-paper -Log
+pdx new sample-report
+pdx build sample-report
+pdx build sample-report -Log
 ```
 
 ### Linux / Unix shell
@@ -33,9 +33,9 @@ docker version
 docker compose version
 docker info
 ./pdx setup
-./pdx new sample-check
-./pdx build sample-paper
-./pdx build sample-paper -Log
+./pdx new sample-report
+./pdx build sample-report
+./pdx build sample-report -Log
 ```
 
 ## Tracking table

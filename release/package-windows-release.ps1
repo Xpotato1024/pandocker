@@ -95,9 +95,15 @@ try {
         'csl'
         'preamble'
         'templates'
-        'projects'
     )) {
         Copy-Item -LiteralPath (Join-Path $repoRoot $directory) -Destination (Join-Path $stagingRoot $directory) -Recurse -Force
+    }
+
+    $samplePaper = Join-Path $repoRoot 'projects\sample-paper'
+    if (Test-Path $samplePaper) {
+        Copy-Item -LiteralPath $samplePaper -Destination (Join-Path $stagingRoot 'projects\sample-paper') -Recurse -Force
+    } else {
+        New-Item -ItemType Directory -Force -Path (Join-Path $stagingRoot 'projects') | Out-Null
     }
 
     $installNote = Join-Path $stagingRoot 'INSTALL.txt'

@@ -67,7 +67,7 @@ pdx build sample-report
 - `preamble/` - LaTeX preamble fragments
 - `csl/` - citation styles
 - `tools/` - Rust binaries for Windows installation and setup
-- `projects/<name>/src/` - project source Markdown
+- `projects/<name>/content/` - project Markdown source
 - `projects/<name>/output/` - generated PDFs
 - `docs/` - release, support, and roadmap documentation
 

@@ -1,19 +1,13 @@
-# ==========================================
-# OS 一時ファイル
-# ==========================================
-# Windows
+# OS files
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
-# macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 
-# ==========================================
-# エディタ / IDE 関連
-# ==========================================
+# Editor and IDE files
 .vscode/
 .idea/
 *.swp
@@ -23,19 +17,11 @@ $RECYCLE.BIN/
 *.tmp
 *.log
 
-# ==========================================
-# Docker / ビルド関連
-# ==========================================
-# コンテナの一時ファイル
+# Docker / environment files
 docker-compose.override.yml
 *.env
 
-# ==========================================
-# Pandoc / PDF 出力
-# ==========================================
-# 出力フォルダ
-report1/output/
-# 一時ファイル
+# Pandoc / PDF outputs
 *.aux
 *.log
 *.out
@@ -51,22 +37,17 @@ report1/output/
 *.blg
 *.bbl
 
-# ==========================================
-# バックアップ / OS 一時ファイル
-# ==========================================
+# Backup and temp files
 *.bak
 *~
 ~$*
 
-# =========================================
-# プロジェクト生成物を除外
-# =========================================
+# Ignore generated project trees by default.
 projects/**
 
-# ただし、サンプルだけは残す
+# Keep the bundled sample project tracked.
 !projects/sample-paper/
-!projects/sample-paper/bib/
-!projects/sample-paper/src/
+!projects/sample-paper/content/
 !projects/sample-paper/output/
 !projects/sample-paper/output/.gitkeep
 !projects/sample-paper/**/defaults.yml

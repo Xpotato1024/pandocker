@@ -11,13 +11,13 @@
 - ビルド挙動の変更は、まず `tools/`、`config/`、`defaults.yml` を見ます。
 - Windows の導入導線は `install.ps1` と `tools/pdx-installer/` を優先して扱ってください。
 - 旧来のシェル / PowerShell スクリプトは `legacy/` に退避した前提で、原則として新規修正はしません。
-- 新しい雛形やテンプレートの変更は `templates/` と `projects/<project>/src/` の関係を崩さないようにしてください。
+- 新しい雛形やテンプレートの変更は `templates/` と `projects/<project>/content/` の関係を崩さないようにしてください。
 - LaTeX 周りの調整は `preamble/` を優先し、テンプレート全体を大きく書き換えないでください。
 - 引用スタイルの追加や切り替えは `csl/` と `report.md` の YAML ヘッダーの整合を保ってください。
 
 ## 生成物と作業領域
 
-- `projects/<name>/src/` が編集対象の本文です。
+- `projects/<name>/content/` が編集対象の本文です。
 - `projects/<name>/output/` はビルド成果物です。必要なとき以外は手を入れないでください。
 - `log/` はビルドログです。調査以外では変更しないでください。
 - `legacy/` は旧スクリプトの保管場所です。配布向けの本体は `tools/` の Rust バイナリです。

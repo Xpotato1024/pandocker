@@ -43,9 +43,13 @@ Usage:
   pdx build <ProjectName> [options]
 
 Build options:
-  -All    Build every Markdown file under src/
+  -All    Build every Markdown file under the project source directory
   -Log    Save pandoc output to log/
 EOF
+}
+
+print_version() {
+    echo "Pandocker-X shell entrypoint 0.1.1"
 }
 
 setup_project() {
@@ -82,7 +86,7 @@ new_project() {
     done
 
     if [[ -z "$report_name" ]]; then
-        echo "Error: report name is required." >&2
+        echo "Error: project name is required." >&2
         echo "Usage: pdx new <ProjectName> [-Paper]" >&2
         exit 1
     fi
@@ -102,7 +106,7 @@ new_project() {
     fi
 
     echo "Creating 'projects/$report_name'..."
-    mkdir -p "$target_dir/src" "$target_dir/images" "$target_dir/bib" "$target_dir/output"
+    mkdir -p "$target_dir/content" "$target_dir/images" "$target_dir/bib" "$target_dir/output"
     : > "$target_dir/bib/references.bib"
 
     local template_content
@@ -110,7 +114,7 @@ new_project() {
     template_content=$(<"$template_path")
     template_content=${template_content//\{\{DATE\}\}/$(date +%F)}
     template_content=${template_content//\{\{CSL_PATH\}\}/$csl_path}
-    printf '%s' "$template_content" > "$target_dir/src/report.md"
+    printf '%s' "$template_content" > "$target_dir/content/report.md"
 
     if [[ -f "$defaults_path" ]]; then
         cp "$defaults_path" "$target_dir/defaults.yml"
@@ -121,7 +125,7 @@ new_project() {
 
     echo
     echo "Project 'projects/$report_name' is ready."
-    echo "Edit projects/$report_name/src/report.md to start writing."
+    echo "Edit projects/$report_name/content/report.md to start writing."
     if [[ "$paper" == true ]]; then
         echo "Paper preset enabled: defaults.yml was copied from defaults-paper.yml."
     fi
@@ -158,7 +162,7 @@ build_project() {
     done
 
     if [[ -z "$report_name" ]]; then
-        echo "Error: report name is required." >&2
+        echo "Error: project name is required." >&2
         echo "Usage: pdx build <ProjectName> [options]" >&2
         exit 1
     fi
@@ -173,14 +177,15 @@ build_project() {
         common_args+=("$arg")
     done < <(jq -r '.pdf_args[]' "$PANDOC_ARGS_JSON")
 
-    local src_dir="$PROJECTS_DIR/$report_name/src"
+    local source_dir
+    source_dir=$(resolve_project_source_dir "$report_name")
     if [[ "$all" == true ]]; then
-        if [[ -d "$src_dir" ]]; then
+        if [[ -d "$source_dir" ]]; then
             while IFS= read -r file; do
-                input_files+=("${file#"$src_dir"/}")
-            done < <(find "$src_dir" -type f -name '*.md' | sort)
+                input_files+=("${file#"$source_dir"/}")
+            done < <(find "$source_dir" -type f -name '*.md' | sort)
         else
-            echo "Warning: $src_dir not found." >&2
+            echo "Warning: $source_dir not found." >&2
         fi
     elif [[ ${#input_files[@]} -eq 0 ]]; then
         input_files=("report.md")
@@ -203,7 +208,7 @@ build_project() {
 
     local input_file host_input_path rel_dir rel_pdf output_dir container_work_dir defaults output_file output_dir_container pandoc_args pandoc_cmd inner_command start_time elapsed build_ec
     for input_file in "${input_files[@]}"; do
-        host_input_path="$src_dir/$input_file"
+        host_input_path="$source_dir/$input_file"
         if [[ ! -f "$host_input_path" ]]; then
             echo "Warning: missing $host_input_path, skipping." >&2
             continue
@@ -217,7 +222,7 @@ build_project() {
         output_dir="$PROJECTS_DIR/$report_name/output/$rel_dir"
         mkdir -p "$output_dir"
 
-        container_work_dir="/data/projects/$report_name/src"
+        container_work_dir="/data/projects/$report_name/$(source_dir_name "$source_dir")"
         defaults="../defaults.yml"
         output_file="../output/$rel_pdf"
         if [[ -z "$rel_dir" ]]; then
@@ -276,6 +281,9 @@ main() {
         -h|--help|help)
             usage
             ;;
+        -V|--version|version)
+            print_version
+            ;;
         setup)
             shift
             setup_project "$@"
@@ -297,6 +305,26 @@ main() {
             usage >&2
             exit 1
             ;;
+    esac
+}
+
+resolve_project_source_dir() {
+    local report_name=$1
+    local project_root="$PROJECTS_DIR/$report_name"
+    if [[ -d "$project_root/content" ]]; then
+        printf '%s' "$project_root/content"
+    elif [[ -d "$project_root/src" ]]; then
+        printf '%s' "$project_root/src"
+    else
+        printf '%s' "$project_root/content"
+    fi
+}
+
+source_dir_name() {
+    local source_dir=$1
+    case "$(basename "$source_dir")" in
+        src) printf 'src' ;;
+        *) printf 'content' ;;
     esac
 }
 

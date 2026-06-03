@@ -8,11 +8,11 @@ on:
 
 jobs:
   windows-rust:
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -26,11 +26,11 @@ jobs:
         run: cargo check --locked --manifest-path tools/pdx-installer/Cargo.toml
 
   windows-powershell:
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Parse PowerShell scripts
         shell: pwsh

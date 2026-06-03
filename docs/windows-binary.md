@@ -33,12 +33,12 @@ If the machine does not have the Windows linker toolchain installed, build from 
 The command binary keeps the same top-level commands as the historical scripts:
 
 - `pdx setup`
-- `pdx new <ReportName> [-Paper]`
+- `pdx new <ProjectName> [-Paper]`
 - `pdx build <ProjectName> [options]`
 
 Build flags:
 
-- `-All` builds every Markdown file under `projects/<name>/src/`
+- `-All` builds every Markdown file under `projects/<name>/content/` when present, or `projects/<name>/src/` for older projects
 - `-Log` writes pandoc output to `log/`
 
 ## Install
@@ -56,7 +56,7 @@ The Windows release zip contains:
 - `csl/`
 - `preamble/`
 - `templates/`
-- `projects/`
+- `projects/sample-paper/`
 - `INSTALL.txt`
 - `LICENSE`
 - `README.md`

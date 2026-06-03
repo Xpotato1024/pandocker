@@ -278,9 +278,12 @@ fn copy_bundle_resources(bundle_root: &Path, install_dir: &Path) -> Result<()> {
         }
     }
 
-    let projects_source = bundle_root.join("projects");
+    let projects_source = bundle_root.join("projects").join("sample-paper");
     if projects_source.exists() {
-        copy_tree(&projects_source, &install_dir.join("projects"))?;
+        copy_tree(
+            &projects_source,
+            &install_dir.join("projects").join("sample-paper"),
+        )?;
     } else {
         fs::create_dir_all(install_dir.join("projects")).map_err(|err| {
             format!(
