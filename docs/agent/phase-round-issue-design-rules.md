@@ -1,103 +1,122 @@
 # Phase / Round / Issue Design Rules
 
-## 逶ｮ逧・
-縺薙・譁・嶌縺ｯ縲￣andocker-X 縺ｮ Phase / Round / Issue 縺ｮ蛻・ｊ蛻・￠譁ｹ繧貞ｮ夂ｾｩ縺励∪縺吶・issue 縺斐→縺ｮ PR縲〉eplacement PR縲《tale PR 縺ｮ謇ｱ縺・√◎縺励※迴ｾ蝨ｨ縺ｮ issue 鬆・ｒ縺薙％縺ｧ蝗ｺ螳壹＠縺ｾ縺吶・
-## Definitions
+## 目的
 
-- Phase: 隍・焚 issue 繧偵∪縺溘＄螟ｧ縺阪↑蜿悶ｊ邨・∩縺ｧ縺吶・- Round: Codex 縺ｮ 1 蝗槭・螳溯｡後〒縺吶・- Issue: 1 PR 縺ｫ蜿弱ａ繧九Ξ繝薙Η繝ｼ蜿ｯ閭ｽ縺ｪ蜊倅ｽ阪〒縺吶・
-## Design rules
+この文書は、Pandocker-X の Phase / Round / Issue の設計ルールを定義します。
+build safety、runtime root 分離、unified template target architecture、LaTeX ownership cleanup を、どの順で、どの単位で進めるかを明確にします。
 
-- Phase 繧・1 round 縺ｫ謚ｼ縺苓ｾｼ縺ｾ縺ｪ縺・〒縺上□縺輔＞縲・- 1 issue 繧定､・焚縺ｮ辟｡髢｢菫・PR 縺ｫ蛻・牡縺励↑縺・〒縺上□縺輔＞縲・- 1 branch, 1 issue, 1 PR 繧貞次蜑・↓縺励※縺上□縺輔＞縲・- 螳溯｣・」alidation縲‥ocumentation 縺ｯ蜷後§ issue scope 縺ｫ蜷医ｏ縺帙※縺上□縺輔＞縲・
-## Branch / PR rules
+## 基本構造
 
-- Base branch: `master`
-- Branch name: `codex/<issue-number>-<short-description>`
-- PR title 縺ｯ issue 縺ｮ蜀・ｮｹ縺悟・縺九ｋ遏ｭ縺・ｂ縺ｮ縺ｫ縺励※縺上□縺輔＞縲・- PR body 縺ｫ縺ｯ蠢・磯・岼繧呈純縺医※縺上□縺輔＞縲・
-PR body 蠢・磯・岼:
+- Phase: 大きな技術テーマです。
+- Round: Codex に 1 回やらせる実行単位です。
+- Issue: 1 PR に収める変更単位です。
 
-- Summary
-- Changed Files
-- What Changed
-- Validation Run
-- Scope Check
-- Scope Exclusions
-- Runtime / Docker / TeX Status
-- Branch / Diff Gate
-- Remaining Risks
-- Handoff
-- Related issue
+Phase を複数の Round に分け、Round を 1 Issue に対応させます。
+1 issue = 1 PR を維持します。
 
-## Validation rules
+## Phase の定義
 
-docs-only 縺ｮ縺ｨ縺阪・蟆代↑縺上→繧よｬ｡繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・
-```bash
-git diff --check
-git status --short --branch
-git diff --name-only origin/master...HEAD
-```
+Phase は、複数 issue を横断する大きな整理単位です。
+Phase の例は、build safety の整備、runtime root の分離、template target の統一、LaTeX ownership の整理です。
 
-behavior 螟画峩縺ｧ縺ｯ縲∝ｯｾ雎｡縺ｫ蠢懊§縺ｦ霑ｽ蜉 validation 繧定｡後▲縺ｦ縺上□縺輔＞縲・
-```bash
-bash -n pdx
-cargo check --locked --manifest-path tools/pdx-win/Cargo.toml
-cargo check --locked --manifest-path tools/pdx-installer/Cargo.toml
-./pdx setup
-./pdx new smoke-report
-./pdx build smoke-report -Log
-test -f projects/smoke-report/output/report.pdf
-```
+## Round の定義
 
-## Runtime / Docker / TeX rules
+Round は、Codex が 1 回で完了できる変更単位です。
+Round は 1 issue に対応させ、1 PR に着地させます。
 
-- Pandocker-X 縺ｮ讓呎ｺ・build 縺ｯ Docker runtime 繧剃ｽｿ縺｣縺ｦ縺上□縺輔＞縲・- host TeX Live 繧呈ｭ｣縺ｨ縺励↑縺・〒縺上□縺輔＞縲・- template target 縺ｯ Docker image / runtime 縺ｮ雋ｬ蜍吶→縺励※謇ｱ縺｣縺ｦ縺上□縺輔＞縲・- `lualatex`, `platex`, `uplatex`, `pbibtex`, `dvipdfmx`, `latexmk` 縺ｮ蜿ｯ逕ｨ諤ｧ縺ｯ Docker 蛛ｴ縺ｧ菫晁ｨｼ縺励※縺上□縺輔＞縲・
-## Release publishing boundary
+## Issue の定義
 
-谺｡縺ｯ譏守､ｺ逧・↑ release 菴懈･ｭ縺ｧ縺ｪ縺・剞繧顔ｦ∵ｭ｢縺ｧ縺吶・
-- GitHub Release 縺ｮ菴懈・
-- release asset upload
-- checksum 縺ｮ蜈ｬ髢・- secrets / credentials 縺ｮ謫堺ｽ・- deployment key 縺ｮ螟画峩
+Issue は、レビュー可能で、validation 可能で、PR に収まる変更です。
+Issue が大きすぎるなら、Round を分けます。
 
-## Unified template target rule
+## Pandocker-X の現在の Phase / Round 推奨構造
 
-- user-facing route 縺ｯ蜊倡ｴ斐↓菫昴▲縺ｦ縺上□縺輔＞縲・- `pdx new <name>`
-- `pdx new <name> --target <target-id>`
-- `pdx build <name>`
-- 縺薙ｌ莉･螟悶・ top-level command 繧貞｢励ｄ縺励※ workflow 繧貞・蟯舌＆縺帙↑縺・〒縺上□縺輔＞縲・
-## Replacement PR / stale PR rules
+現在の推奨構造は次の通りです。
 
-- replacement PR 繧剃ｽ懊ｋ縺ｨ縺阪・縲∵立 PR 縺・stale 縺ｫ縺ｪ縺｣縺溘％縺ｨ繧呈・險倥＠縺ｦ縺上□縺輔＞縲・- stale PR 縺ｯ merge 蟇ｾ雎｡縺ｫ縺励↑縺・〒縺上□縺輔＞縲・- 蜷後§ issue 縺ｮ荳ｦ襍ｰ PR 繧呈叛鄂ｮ縺励↑縺・〒縺上□縺輔＞縲・
-## Round completion audit
+### Phase A: Build safety and validation foundation
 
-round 螳御ｺ・燕縺ｫ谺｡繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・
-- diff 縺・issue scope 縺九ｉ縺ｯ縺ｿ蜃ｺ縺励※縺・↑縺・- forbidden files 縺悟・縺｣縺ｦ縺・↑縺・- validation 縺碁壹▲縺ｦ縺・ｋ
-- PR 譛ｬ譁・′螳溷ｷｮ蛻・→荳閾ｴ縺励※縺・ｋ
-- gpt-5.5 review 縺悟ｿ・ｦ√↑蝣ｴ蜷医・譛ｪ螳御ｺ・・縺ｾ縺ｾ縺ｫ縺吶ｋ
+- 目的: build 失敗の意味付けと入力境界を整える。
+- 対象: #10, #11, #12
+- 方針: build safety を先に固め、後続の runtime / template 作業の土台にします。
 
-## gpt-5.5 review
+### Round A1: #10, #11, #12
 
-safe for merge縲《afe for light human review縲ヽound complete縲“oal complete縲｜locked 縺ｮ譛邨ょ愛譁ｭ縺ｯ縲∝ｿ・ｦ√↓蠢懊§縺ｦ gpt-5.5 review 繧貞燕謠舌↓縺励※縺上□縺輔＞縲・
-## Stop conditions
+- #10 Align Unix and Windows build failure semantics
+- #11 Validate project names and prevent path traversal
+- #12 Add PDF smoke tests for CI and release artifacts
 
-谺｡縺後≠繧後・豁｢繧√※蝣ｱ蜻翫＠縺ｦ縺上□縺輔＞縲・
-- repository mismatch
-- wrong base branch
-- issue scope exceeded
-- unrelated working tree changes
-- validation failure outside the scope
-- Docker or TeX runtime gap
-- release publishing is implied but not authorized
-- required review is unavailable
+この round 群は、build / input boundary / CI validation を先に安定化させます。
 
-## Final report format
+### Phase B: Runtime root and workspace root separation
 
-譛邨ょｱ蜻翫・谺｡縺ｮ鬆・ｺ上〒譖ｸ縺・※縺上□縺輔＞縲・
-1. 螟画峩縺ｮ隕∫せ
-2. validation 邨先棡
-3. changed files
-4. forbidden files 縺悟性縺ｾ繧後※縺・↑縺・｢ｺ隱・5. 蠢・ｦ√↑繧画ｬ｡縺ｮ荳謇・
-## Current issue order
+- 目的: installed Windows usage の runtime root と workspace root を分離する。
+- 対象: #9
+- 方針: インストール済み利用の path handling を整理します。
 
-迴ｾ陦後・謗ｨ螂ｨ蟇ｾ蠢憺・・谺｡縺ｧ縺吶・
+### Phase C: Unified template target architecture
+
+- 目的: paper-build と template-build のような分岐を避け、統一された target architecture を作る。
+- 対象: #14
+- 方針: user-facing route を統一し、target descriptor だけを差し替え可能にします。
+
+### Phase D: LaTeX ownership cleanup
+
+- 目的: defaults / template / preamble の LaTeX 責務を整理する。
+- 対象: #13
+- 方針: LaTeX の責務を再配分し、template 全体の不用意な書き換えを避けます。
+
+## Phase 設計ルール
+
+- Phase は大きく、Round は小さくします。
+- Phase を 1 Round に詰め込みません。
+- Phase の途中で別 Phase の issue を混ぜません。
+- build safety を先に固め、その後に runtime、template、LaTeX を進めます。
+- 依存関係があるものは順番を守ります。
+
+## Issue 作成テンプレート
+
+Issue は次の要素を含めて設計します。
+
+- issue title
+- problem statement
+- expected behavior
+- scope
+- out of scope
+- validation plan
+- PR completion condition
+- related issue ordering
+
+Issue は 1 PR に閉じる前提で書きます。
+
+## Round 作成テンプレート
+
+Round を始めるときは次を明確にします。
+
+- current repository identity
+- default branch
+- issue number
+- branch name
+- expected changed files
+- validation commands
+- PR body sections
+
+Round の開始条件が曖昧なら、始めずに止めます。
+
+## Round 切り分けの判断基準
+
+次の場合は Round を分けます。
+
+- validation が別種類になる
+- runtime / Docker / TeX の前提が変わる
+- 変更ファイル群が別責務になる
+- PR 本文が別の story を必要とする
+- release 関連と docs 関連が混ざる
+- build safety と template architecture が同じ PR に収まりきらない
+
+## Pandocker-X の current issue ordering
+
+現行の issue 順は次です。
+
 1. `#10` Align Unix and Windows build failure semantics
 2. `#11` Validate project names and prevent path traversal
 3. `#12` Add PDF smoke tests for CI and release artifacts
@@ -105,6 +124,24 @@ safe for merge縲《afe for light human review縲ヽound complete縲“oal compl
 5. `#14` Introduce unified template target architecture
 6. `#13` Consolidate LaTeX defaults/template/preamble ownership
 
-## Related reference
+この順は、build safety → runtime separation → template architecture → LaTeX ownership の流れを表します。
 
-- `docs/agent/codex-round-batch-execution-guardrails.md`
+## Completion Audit ルール
+
+Round を完了とみなす前に、次を確認します。
+
+- diff が issue scope に収まっている
+- expected files 以外が入っていない
+- forbidden files が入っていない
+- validation が通っている
+- PR 本文が実差分と一致している
+- 必須 review 条件を満たしている
+- human merge に回せる状態になっている
+
+## 最終方針
+
+- 1 issue = 1 PR を守ります。
+- Round は小さく、Phase は大きく扱います。
+- まず build safety、次に runtime separation、その後に template architecture、最後に LaTeX ownership を扱います。
+- current issue ordering は必ず尊重します。
+- 不明点があれば Round を止めます。

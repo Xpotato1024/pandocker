@@ -1,22 +1,31 @@
 # Codex Round Batch Execution Guardrails
 
-## 逶ｮ逧・
-縺薙・譁・嶌縺ｯ縲￣andocker-X 縺ｧ Codex 縺・1 round 繧貞ｮ溯｡後☆繧九→縺阪・驕狗畑繝ｫ繝ｼ繝ｫ繧貞ｮ夂ｾｩ縺励∪縺吶・repository identity縲｜ase branch縲（ssue scope縲」alidation縲〉eview縲￣R 菴懈・繧偵％縺ｮ譁・嶌縺ｮ蝓ｺ貅悶〒謇ｱ縺・∪縺吶・
-## Goal usage
+## 目的
 
-- 1 round 縺斐→縺ｫ 1 goal 繧剃ｽｿ縺｣縺ｦ縺上□縺輔＞縲・- goal 縺ｯ 1 issue 縺ｮ螳御ｺ・愛螳壹ｒ霑ｽ霍｡縺吶ｋ縺溘ａ縺ｫ菴ｿ縺｣縺ｦ縺上□縺輔＞縲・- goal 繧・complete 縺ｫ縺吶ｋ縺ｮ縺ｯ縲∝ｿ・・validation 縺檎ｵゅｏ繧翫∝ｷｮ蛻・′ scope 蜀・↓蜿弱∪繧翫￣R 譛ｬ譁・ｂ謨ｴ縺｣縺溘→縺阪□縺代↓縺励※縺上□縺輔＞縲・- 蜷後§髦ｻ螳ｳ隕∝屏縺檎ｹｰ繧願ｿ斐＠蜃ｺ縺溘→縺阪□縺・blocked 繧剃ｽｿ縺｣縺ｦ縺上□縺輔＞縲・- 騾比ｸｭ縺ｧ蛻･ issue 縺ｫ蠎・￡縺ｪ縺・〒縺上□縺輔＞縲・
-## Repository identity
+この文書は、Pandocker-X で Codex に 1 round を実行させるときの正式な運用ガードレールです。
+repository guard を最優先にし、Round 単位で安全に進め、Phase 丸ごとを Codex に任せないための基準を定義します。
+
+## 基本原則
+
+- Repository guard を最優先にします。
+- Codex に任せるのは Round までです。Phase 丸ごとは任せません。
+- 通常運用では Codex は merge しません。
+- 1 issue = 1 PR を守ります。
+- 変更は issue scope に閉じます。
+- 実装、validation、PR 本文、レビュー判断は同じ事実に基づいて整合させます。
+
+## Repository guard
 
 - Project: `Pandocker-X`
 - Repository: `Xpotato1024/Pandocker-X`
-- default branch 縺ｮ source of truth: `gh repo view --json nameWithOwner,defaultBranchRef`
-- 迴ｾ譎らせ縺ｮ default branch: `master`
+- default branch の source of truth: `gh repo view --json nameWithOwner,defaultBranchRef`
+- 現時点の `defaultBranchRef.name`: `master`
 - PR base: `master`
+- `Xpotato1024/Pandocker-X` 以外では作業しません。
+- `Xpotato1024/Selfrionette` では絶対に作業しません。
 
-repository identity 縺御ｸ閾ｴ縺励↑縺・ｴ蜷医・菴懈･ｭ繧呈ｭ｢繧√※蝣ｱ蜻翫＠縺ｦ縺上□縺輔＞縲・
-## Mandatory preflight
+作業前には次を必ず確認します。
 
-round 髢句ｧ句燕縺ｫ蠢・★谺｡繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・
 ```powershell
 git remote -v
 git branch --show-current
@@ -24,28 +33,147 @@ git status --short --branch
 gh repo view --json nameWithOwner,defaultBranchRef
 ```
 
-谺｡縺ｮ縺・★繧後°縺後≠繧後・ stop condition 縺ｧ縺吶・
+次があれば作業を止めます。
+
 - repository mismatch
 - wrong base branch
-- unexpected working tree changes
-- required validation 縺ｮ螟ｱ謨・
-## Work hierarchy
+- unrelated working tree changes
+- validation failure
+- Docker / TeX runtime gap
 
-- Phase: 螟ｧ縺阪↑謌ｦ逡･逧・叙繧顔ｵ・∩縺ｧ縺吶・- Round: Codex 縺ｮ 1 蝗槭・螳溯｡後〒縺吶・- Issue: 1 PR 縺ｫ蜿弱ａ繧九Ξ繝薙Η繝ｼ蜿ｯ閭ｽ縺ｪ蜊倅ｽ阪〒縺吶・- 1 issue = 1 PR 繧貞ｮ医▲縺ｦ縺上□縺輔＞縲・
-Phase 繧・1 round 縺ｧ邨ゅｏ繧峨○繧医≧縺ｨ縺励↑縺・〒縺上□縺輔＞縲・Issue 縺ｮ遽・峇繧定ｶ・∴繧句､画峩縺ｯ谺｡ round 縺ｫ蛻・屬縺励※縺上□縺輔＞縲・
 ## Output formatting guard
 
-- prompt 繧・final report 縺ｧ縺ｯ Markdown 繧定ｪｭ縺ｿ繧・☆縺丈ｿ昴▲縺ｦ縺上□縺輔＞縲・- nested triple-backtick 縺ｯ菴懊ｉ縺ｪ縺・〒縺上□縺輔＞縲・- command 縺ｮ萓九・ plain text 縺句挨縺ｮ fenced block 縺ｫ蛻・￠縺ｦ縺上□縺輔＞縲・
-## Validation rules
+- prompt や PR 本文で nested triple-backtick code fence を作りません。
+- 複数の prompt を出すときは、独立した code block に分けます。
+- command example は prompt block 内では plain text として書きます。
+- 文書は GitHub でそのまま読める日本語にします。
 
-docs-only 螟画峩縺ｧ縺ｯ縲∝ｰ代↑縺上→繧よｬ｡繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・
+## 一括実行してよい条件
+
+- repository guard が一致している。
+- 対象 issue が 1 つに定まっている。
+- issue scope が小さく、Round で完了可能である。
+- 変更対象が docs-only か、あるいは既知の build / validation 範囲に収まる。
+- 使う validation が事前に特定できる。
+- PR 本文に必要事項を書き切れる。
+
+## 一括実行してはいけない条件
+
+- repository mismatch がある。
+- wrong base branch である。
+- unrelated working tree changes がある。
+- issue scope が広すぎる。
+- Phase 丸ごとを 1 round に押し込もうとしている。
+- release publishing が暗黙に必要だが許可されていない。
+- Docker / TeX runtime が足りない。
+- gpt-5.5 review が必要なのに回避しようとしている。
+
+## goal usage
+
+- 1 round ごとに 1 goal を使います。
+- goal は 1 issue の完了判定を追跡するために使います。
+- goal complete は、必須 validation が終わり、差分が scope 内で、PR 本文も整っているときだけ使います。
+- goal blocked は、同じ阻害要因が繰り返し出て、これ以上意味のある進展がないときだけ使います。
+- 途中で別 issue に広げません。
+
+## goal complete の定義
+
+次をすべて満たしたときにのみ goal complete とします。
+
+- diff が issue scope に収まっている
+- forbidden files が入っていない
+- validation が通っている
+- PR 本文が実差分と一致している
+- 必須の review 前提を満たしている
+
+## goal blocked の定義
+
+次の条件が同じ形で繰り返され、前に進めない場合のみ goal blocked とします。
+
+- repository guard の不一致
+- base branch の不一致
+- 必要な validation の未達
+- 必須レビューが取得不能
+- runtime / environment の欠落
+
+単に難しい、遅い、まだ終わっていない、では blocked にしません。
+
+## モデル分割ルール
+
+- Phase は人間側の管理単位です。
+- Round は Codex に分ける実行単位です。
+- Issue は 1 PR に収める変更単位です。
+- Codex に Phase 全体を投げないでください。
+- Round が終わらないなら、Phase を分割してください。
+
+## gpt-5.5 review 必須タイミング
+
+次のいずれかに当てはまるときは、gpt-5.5 review を前提にします。
+
+- behavior を変える
+- review なしで safe for merge を言いたくなる
+- Round complete / goal complete の最終判断が曖昧
+- stacked PR で相互依存がある
+- release や runtime に影響する
+
+## review 観点
+
+- scope が issue に収まっているか
+- forbidden files が含まれていないか
+- validation が十分か
+- PR 本文が実差分と一致しているか
+- release / secrets / runtime の禁止境界を破っていないか
+- replace すべき PR を stale のまま放置していないか
+
+## 実行単位
+
+- 1 round は 1 issue を対象にします。
+- 1 round は 1 PR に対応させます。
+- 1 round の中で別 issue を混ぜません。
+
+## Issue 選定ルール
+
+- 現行の推奨順を優先します。
+- 依存関係のある issue は順番を守ります。
+- docs-only、validation-only、behavior change を同じ PR に混ぜません。
+- issue が大きすぎる場合は round を分割します。
+
+## PR / commit title ルール
+
+- branch 名は `codex/<issue-number>-<short-description>` にします。
+- commit title は簡潔な命名にします。
+- PR title は `[docs] ...` のように、変更の性質が分かるものにします。
+- `Closes #<issue-number>` のような自動クローズ keyword は、意図した issue 以外には使いません。
+
+## PR 本文の必須項目
+
+PR 本文には少なくとも次を含めます。
+
+- Summary
+- Changed Files
+- What Changed
+- Validation Run
+- Scope Check
+- Scope Exclusions
+- Runtime / Docker / TeX Status
+- Release Impact
+- Branch / Diff Gate
+- Remaining Risks
+- Handoff
+- Related issue
+
+## validation ルール
+
+docs-only 変更では最低限次を確認します。
+
 ```bash
 git diff --check
 git status --short --branch
 git diff --name-only origin/master...HEAD
 ```
 
-behavior 螟画峩縺ｧ縺ｯ縲∬ｩｲ蠖薙☆繧玖ｿｽ蜉 validation 繧貞ｮ滓命縺励※縺上□縺輔＞縲・
+behavior 変更では、変更内容に応じて次を追加します。
+
 - `bash -n pdx`
 - `cargo check --locked --manifest-path tools/pdx-win/Cargo.toml`
 - `cargo check --locked --manifest-path tools/pdx-installer/Cargo.toml`
@@ -54,62 +182,70 @@ behavior 螟画峩縺ｧ縺ｯ縲∬ｩｲ蠖薙☆繧玖ｿｽ蜉 validation
 - `./pdx build smoke-report -Log`
 - `test -f projects/smoke-report/output/report.pdf`
 
-## Runtime / Docker / TeX rules
+必要に応じて、PowerShell / Bash の実行互換性も確認します。
 
-- Pandocker-X 縺ｯ Docker runtime 繧呈ｭ｣縺ｨ縺励※縺上□縺輔＞縲・- host TeX Live 繧貞燕謠舌↓縺励↑縺・〒縺上□縺輔＞縲・- template target 繧・TeX engine 縺ｮ雋ｬ蜍吶・ Docker image / runtime 蛛ｴ縺ｫ鄂ｮ縺・※縺上□縺輔＞縲・- `lualatex`, `platex`, `uplatex`, `pbibtex`, `dvipdfmx`, `latexmk` 繧剃ｽｿ縺・path 縺ｯ Docker runtime 縺ｮ荳ｭ縺ｫ髢峨§縺ｦ縺上□縺輔＞縲・
-## Release publishing boundary
+## Pandocker-X 固有の禁止境界
 
-谺｡縺ｯ譏守､ｺ逧・↑險ｱ蜿ｯ縺後↑縺・剞繧顔ｦ∵ｭ｢縺ｧ縺吶・
-- GitHub Release 縺ｮ菴懈・
+次は明示的な許可がない限り禁止です。
+
+- release publishing
 - release asset upload
-- checksum 縺ｮ蜀咲匱陦後ｄ蜈ｬ髢・- secrets / credentials 縺ｮ謫堺ｽ・- deployment key 縺ｮ螟画峩
+- Docker image publish
+- secrets 編集
+- deployment keys の変更
+- destructive Docker cleanup
+- host TeX Live を source of truth とみなすこと
 
-## PR body required items
+## Docker / TeX runtime 原則
 
-PR 譛ｬ譁・↓縺ｯ蠢・★谺｡繧貞・繧後※縺上□縺輔＞縲・
-- Summary
-- Changed Files
-- What Changed
-- Validation Run
-- Scope Check
-- Scope Exclusions
-- Runtime / Docker / TeX Status
-- Branch / Diff Gate
-- Remaining Risks
-- Handoff
-- Related issue
+- Pandocker-X の標準 runtime は Docker です。
+- host TeX Live は通常依存ではありません。
+- target descriptor の要求と Docker image の実体を混同しません。
+- `lualatex`, `platex`, `uplatex`, `pbibtex`, `dvipdfmx`, `latexmk` は、target が必要とするなら container 内に必要です。
 
-## Replacement PR / stale PR rules
+## stacked PR ルール
 
-- 譌｢蟄・PR 繧堤ｽｮ縺肴鋤縺医ｋ蝣ｴ蜷医・縲〉eplacement PR 繧呈・遉ｺ縺励※縺上□縺輔＞縲・- stale 縺ｫ縺ｪ縺｣縺・PR 縺ｯ縺昴・縺ｾ縺ｾ謾ｾ鄂ｮ縺帙★縲∝ｿ・ｦ√↑繧・close 縺句ｷｮ縺玲崛縺医ｒ陦後▲縺ｦ縺上□縺輔＞縲・- 蜷後§ issue 繧定､・焚 PR 縺ｧ荳ｦ襍ｰ縺輔○縺ｪ縺・〒縺上□縺輔＞縲・
-## Round completion audit
+- stacked PR が必要なら、親子関係を明示します。
+- 子 PR は親 PR に依存することを本文で説明します。
+- 依存が解けるまで stale 化を放置しません。
 
-round 繧貞ｮ御ｺ・→縺ｿ縺ｪ縺吝燕縺ｫ谺｡繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・
-- diff 縺・issue scope 縺ｫ蜿弱∪縺｣縺ｦ縺・ｋ
-- forbidden files 縺悟・縺｣縺ｦ縺・↑縺・- validation 縺碁壹▲縺ｦ縺・ｋ
-- PR 譛ｬ譁・′螳溷ｷｮ蛻・→荳閾ｴ縺励※縺・ｋ
-- gpt-5.5 review 縺悟ｿ・ｦ√↑蝣ｴ蜷医・螳御ｺ・桶縺・↓縺励↑縺・
-## gpt-5.5 review
+## replacement PR ルール
 
-safe for merge縲《afe for light human review縲ヽound complete縲“oal complete縲｜locked 縺ｮ譛邨ょ愛譁ｭ縺ｯ縲∝ｿ・ｦ√↑蝣ｴ蜷医・ gpt-5.5 review 繧堤ｵ後※縺九ｉ縺ｫ縺励※縺上□縺輔＞縲・
-## Final report format
+- 既存 PR を置き換える場合は replacement であることを明示します。
+- 置き換え前の PR は stale になったことを明確にします。
+- 同じ issue の並走 PR を増やしません。
 
-譛邨ょｱ蜻翫・谺｡縺ｮ鬆・ｺ上〒邁｡貎斐↓縺ｾ縺ｨ繧√※縺上□縺輔＞縲・
-1. 菴輔ｒ螟画峩縺励◆縺・2. 縺ｩ縺ｮ validation 繧帝壹＠縺溘°
-3. 譛溷ｾ・＆繧後◆ changed files 縺ｫ蜿弱∪縺｣縺ｦ縺・ｋ縺・4. 蜷ｫ縺ｾ繧後※縺・↑縺・ｦ∵ｭ｢繝輔ぃ繧､繝ｫ縺後≠繧九°
-5. 蠢・ｦ√↑繧・next step
+## Round completion 判定
 
-## Pandocker-X current issue order
+Round complete にする前に次を確認します。
 
-迴ｾ陦後・謗ｨ螂ｨ蟇ｾ蠢憺・・谺｡縺ｧ縺吶・
-1. `#10` Align Unix and Windows build failure semantics
-2. `#11` Validate project names and prevent path traversal
-3. `#12` Add PDF smoke tests for CI and release artifacts
-4. `#9` Separate runtime root and workspace root for installed Windows usage
-5. `#14` Introduce unified template target architecture
-6. `#13` Consolidate LaTeX defaults/template/preamble ownership
+- diff が issue scope に収まっている
+- forbidden files が含まれていない
+- validation が通っている
+- PR 本文が実差分と一致している
+- 必須 review 条件を満たしている
+- 手戻りが発生しそうな残存リスクを本文に書けている
 
-## Documentation references
+## final report フォーマット
 
-- `docs/agent/phase-round-issue-design-rules.md`
-- `README.md`
+最終報告は次の順番で書きます。
+
+1. 変更の要点
+2. validation 結果
+3. changed files
+4. forbidden files が含まれていない確認
+5. 必要なら次の手順
+
+## 人間 merge 運用
+
+- 通常運用では Codex は merge しません。
+- merge は人間の責務です。
+- review 後に safe for merge を言う場合でも、最終的な merge は人間側で行います。
+
+## 最終方針
+
+- repository guard を最優先にします。
+- 迷ったら Round を止めます。
+- PR 本文と実差分を一致させます。
+- 文字化けや表示崩れを残しません。
+- Xpotato1024/Pandocker-X 以外では作業しません。
