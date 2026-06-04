@@ -102,9 +102,10 @@ pdx build sample-report
 - [docs/windows-binary.md](docs/windows-binary.md)
 - [docs/roadmap.md](docs/roadmap.md)
 - [docs/build-metrics.md](docs/build-metrics.md)
+- [docs/agent/codex-round-batch-execution-guardrails.md](docs/agent/codex-round-batch-execution-guardrails.md)
+- [docs/agent/phase-round-issue-design-rules.md](docs/agent/phase-round-issue-design-rules.md)
 
 ## 補足
 
 - `legacy/` には旧来の shell / PowerShell スクリプトがあります。参照・互換用であり、主要な導線ではありません。
 - GitHub release asset には Windows binaries、Unix 向け source archive、checksum file が含まれます。
-
