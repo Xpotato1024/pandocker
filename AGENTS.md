@@ -59,19 +59,12 @@
 
 ## Validation ルール
 
-- 変更後の基本確認は、対象環境で `pdx setup`、`pdx new "<name>"`、`pdx build "<name>"` のいずれか適切なものを使う。
-- 変更がビルド系なら、少なくとも対象プロジェクトで `pdx build` を通す。
-- Rust の変更が入ったら `cargo check` と `cargo build --release` を確認する。
-- 文字コードやスクリプト変更が入る場合は、PowerShell / Bash の実行互換性も確認する。
-- Markdown docs-only 変更では `git diff --check` を必ず通す。
-- 必要に応じて `git diff --name-only origin/master...HEAD` と `git status --short --branch` で差分境界を確認する。
-- shell 変更では `bash -n pdx` を通す。
-- Rust 変更では `cargo check --locked --manifest-path tools/pdx-win/Cargo.toml` を通す。
-- Rust 変更では `cargo check --locked --manifest-path tools/pdx-installer/Cargo.toml` を通す。
-- Docker / Pandoc / LaTeX 変更では `pdx setup`、`pdx new smoke-report`、`pdx build smoke-report -Log` を通す。
-- `projects/smoke-report/output/report.pdf` の有無を確認する。
-- docs-only では `README.md` の docs/agent リンク以外を増やさない。
-- 詳細な検証条件は `docs/agent/` に逃がす。
+- 全PR: `git diff --check` / `git status --short --branch` / `git diff --name-only origin/master...HEAD`
+- shell 変更: `bash -n pdx`
+- Rust 変更: `cargo check --locked --manifest-path tools/pdx-win/Cargo.toml`
+- Rust 変更: `cargo check --locked --manifest-path tools/pdx-installer/Cargo.toml`
+- Docker / Pandoc / LaTeX 変更: `pdx setup` / `pdx new smoke-report` / `pdx build smoke-report -Log` / `test -f projects/smoke-report/output/report.pdf`
+- docs-only 変更: diff gate / `git diff --check` / mojibake grep
 
 ## Pandocker-X 固有の作業知識
 
@@ -136,23 +129,8 @@
 - 迷いがあれば Round を止める。
 - scope 外の修正は別 issue に分離する。
 - PR 本文は実差分と一致させる。
-- forbidden files を差分に混ぜない。
 - 文字化けが出たら保存形式を疑う。
 - 詳細な理由は `docs/agent/` に逃がす。
-
-## 固定事項
-
-- README.md の変更は docs/agent のリンク追加に限定する。
-- `legacy/` は原則として新規修正しない。
-- Docker runtime を正とする。
-- host TeX Live を通常依存にしない。
-- current issue order は `#10`, `#11`, `#12`, `#9`, `#14`, `#13`。
-- command list は 1 回だけ書く。
-- 差分境界は `git diff --name-only origin/master...HEAD` で確認する。
-- 理由と例外は `docs/agent/` に書く。
-- README.md の docs/agent link だけを維持する。
-- `docs/agent` の詳細は削らない。
-- `pdx` と `.github/workflows/ci.yml` を差分に含めない。
 
 ## 迷ったときの参照順
 
