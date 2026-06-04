@@ -132,12 +132,12 @@ new_project() {
 }
 
 build_project() {
-    ensure_tools
-
     local report_name=""
     local -a input_files=()
+    local -a buildable_files=()
     local all=false
     local log=false
+    local had_failure=false
 
     for arg in "$@"; do
         case "$arg" in
@@ -167,16 +167,6 @@ build_project() {
         exit 1
     fi
 
-    if [[ ! -f "$PANDOC_ARGS_JSON" ]]; then
-        echo "Error: pandoc-args.json not found." >&2
-        exit 1
-    fi
-
-    local -a common_args=()
-    while IFS= read -r arg; do
-        common_args+=("$arg")
-    done < <(jq -r '.pdf_args[]' "$PANDOC_ARGS_JSON")
-
     local source_dir
     source_dir=$(resolve_project_source_dir "$report_name")
     if [[ "$all" == true ]]; then
@@ -196,6 +186,38 @@ build_project() {
         exit 0
     fi
 
+    local input_file host_input_path
+    for input_file in "${input_files[@]}"; do
+        host_input_path="$source_dir/$input_file"
+        if [[ ! -f "$host_input_path" ]]; then
+            echo "Warning: missing $host_input_path, skipping." >&2
+            had_failure=true
+            continue
+        fi
+        buildable_files+=("$input_file")
+    done
+
+    if [[ ${#buildable_files[@]} -eq 0 ]]; then
+        if [[ "$had_failure" == true ]]; then
+            echo "Error: one or more Markdown files failed to build." >&2
+            exit 1
+        fi
+        echo "No Markdown files to build."
+        exit 0
+    fi
+
+    ensure_tools
+
+    if [[ ! -f "$PANDOC_ARGS_JSON" ]]; then
+        echo "Error: pandoc-args.json not found." >&2
+        exit 1
+    fi
+
+    local -a common_args=()
+    while IFS= read -r arg; do
+        common_args+=("$arg")
+    done < <(jq -r '.pdf_args[]' "$PANDOC_ARGS_JSON")
+
     local timestamp log_file_name=""
     timestamp=$(date +"%Y-%m-%dT%H-%M-%S")
     if [[ "$log" == true ]]; then
@@ -206,14 +228,8 @@ build_project() {
 
     cd "$REPO_ROOT"
 
-    local input_file host_input_path rel_dir rel_pdf output_dir container_work_dir defaults output_file output_dir_container pandoc_args pandoc_cmd inner_command start_time elapsed build_ec
-    for input_file in "${input_files[@]}"; do
-        host_input_path="$source_dir/$input_file"
-        if [[ ! -f "$host_input_path" ]]; then
-            echo "Warning: missing $host_input_path, skipping." >&2
-            continue
-        fi
-
+    local rel_dir rel_pdf output_dir container_work_dir defaults output_file output_dir_container pandoc_args pandoc_cmd inner_command start_time elapsed build_ec
+    for input_file in "${buildable_files[@]}"; do
         rel_dir=$(dirname "$input_file")
         if [[ "$rel_dir" == "." ]]; then
             rel_dir=""
@@ -260,6 +276,7 @@ build_project() {
             echo "$input_file -> $rel_pdf generated in ${elapsed}s"
         else
             echo "$input_file PDF generation failed." >&2
+            had_failure=true
             if [[ "$log" == true ]]; then
                 echo "See log/$log_file_name for details." >&2
             fi
@@ -268,6 +285,11 @@ build_project() {
 
     if [[ "$log" == true ]]; then
         echo "Log saved to: log/$log_file_name"
+    fi
+
+    if [[ "$had_failure" == true ]]; then
+        echo "Error: one or more Markdown files failed to build." >&2
+        exit 1
     fi
 }
 

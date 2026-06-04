@@ -52,6 +52,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Verify missing-file failure path
+        shell: bash
+        run: |
+          chmod +x pdx
+          ./pdx new failure-smoke
+          if ./pdx build failure-smoke missing.md; then
+            echo "Expected missing.md to fail."
+            exit 1
+          fi
+
       - name: Check shell scripts
         shell: bash
         run: |
