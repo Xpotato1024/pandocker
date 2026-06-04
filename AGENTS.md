@@ -100,7 +100,7 @@ gh repo view --json nameWithOwner,defaultBranchRef
 
 ## 禁止事項
 
-- main への直接 commit はしないでください。
+- default branch への直接 commit はしないでください。
 - PR merge はしないでください。
 - GitHub Release の作成はしないでください。
 - release asset upload はしないでください。
