@@ -2,7 +2,7 @@
 
 ## このリポジトリの基本方針
 
-- このリポジトリは `Pandocker-X` の source of truth 。
+- このリポジトリは `Pandocker-X` の source of truth。
 - 仕様はまず `README.md`、`defaults.yml`、`config/`、`tools/`、`templates/`、`preamble/`、`csl/` を確認する。
 - 実装と説明が食い違う場合は、実装と設定ファイルを優先して確認し、必要なら `README.md` も更新する。
 - 文章は UTF-8 で保存する。
@@ -77,6 +77,7 @@
 
 - build 挙動の変更は、まず `tools/`、`config/`、`defaults.yml` を見る。
 - Windows の導入導線は `install.ps1` と `tools/pdx-installer/` を優先する。
+- source checkout は `install.ps1`、installed mode は `tools/pdx-installer/` を使う。
 - 旧来のシェル / PowerShell スクリプトは `legacy/` に退避した前提で、原則として新規修正しない。
 - 新しい雛形やテンプレートの変更は `templates/` と `projects/<project>/content/` の関係を崩さない。
 - LaTeX 周りの調整は `preamble/` を優先し、テンプレート全体を大きく書き換えない。
@@ -84,6 +85,7 @@
 - `projects/<name>/content/` は本文。
 - `projects/<name>/output/` は生成物。
 - `log/` はビルドログ。
+- `source checkout` と `installed mode` の境界を崩さない。
 - 現行の issue 順は `#10`, `#11`, `#12`, `#9`, `#14`, `#13`。
 
 ## Docker / TeX runtime ルール
